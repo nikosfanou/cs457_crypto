@@ -8,6 +8,7 @@
  */
 
 #include <stdint.h>
+#include <unistd.h>
 
 /**
  * @brief One-time pad encryption
@@ -104,3 +105,20 @@ uint8_t* feistel_decrypt(uint8_t* ciphertext, uint8_t keys[]);
  * @return uint8_t* Encrypted/Decrypted message (ciphertext/plaintext)
  */
 uint8_t* round(uint8_t* block, uint8_t* key);
+
+/**
+ * @brief Creates a key with the same size as plaintext using /dev/urandom.
+ * 
+ * @param plaintext Message to be encrypted
+ * @return uint8_t* Returns the key
+ */
+uint8_t* key_generator(uint8_t *plaintext);
+
+/**
+ * @brief Reads the content of the input file and copies it on a string. Then returns
+ * the string.
+ * 
+ * @param input_message Pointer on the input file
+ * @return uint8_t* Message to be encrypted
+ */
+uint8_t *read_plaintext(FILE* input_message);
