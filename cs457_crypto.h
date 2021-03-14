@@ -17,7 +17,7 @@
  * @param key Key for encryption-decryption
  * @return uint8_t* Encrypted message (ciphertext)
  */
-uint8_t * otp_encrypt(uint8_t *plaintext, uint8_t *key);
+uint8_t* otp_encrypt(uint8_t* plaintext, uint8_t* key);
 /**
  * @brief One-time pad decryption
  * 
@@ -25,7 +25,7 @@ uint8_t * otp_encrypt(uint8_t *plaintext, uint8_t *key);
  * @param key Key for encryption-decryption
  * @return uint8_t* Decrypted message (plaintext)
  */
-uint8_t * otp_decrypt(uint8_t *ciphertext, uint8_t *key);
+uint8_t* otp_decrypt(uint8_t* ciphertext, uint8_t * key);
 /**
  * @brief Caesar's cipher encryption
  * 
@@ -33,7 +33,7 @@ uint8_t * otp_decrypt(uint8_t *ciphertext, uint8_t *key);
  * @param N N-positions down the alphabet for the encryption of a character
  * @return uint8_t* Encrypted message (ciphertext)
  */
-uint8_t * caesar_encrypt(uint8_t *plaintext, uint16_t N);
+uint8_t* caesar_encrypt(uint8_t* plaintext, uint16_t N);
 /**
  * @brief Caesar's cipher decryption
  * 
@@ -41,7 +41,7 @@ uint8_t * caesar_encrypt(uint8_t *plaintext, uint16_t N);
  * @param N N-positions down the alphabet for the encryption of a character
  * @return uint8_t* Decrypted message (plaintext)
  */
-uint8_t * caesar_decrypt(uint8_t *ciphertext, uint16_t N);
+uint8_t* caesar_decrypt(uint8_t* ciphertext, uint16_t N);
 /**
  * @brief Playfair cipher encryption
  * 
@@ -49,7 +49,7 @@ uint8_t * caesar_decrypt(uint8_t *ciphertext, uint16_t N);
  * @param key 5x5 matrix key for encryption-decryption
  * @return unsigned* Encrypted message (ciphertext)
  */
-unsigned char* playfair_encrypt(unsigned char *plaintext, unsigned char** key);
+unsigned char* playfair_encrypt(unsigned char* plaintext, unsigned char** key);
 /**
  * @brief Playfair cipher decryption
  * 
@@ -57,28 +57,28 @@ unsigned char* playfair_encrypt(unsigned char *plaintext, unsigned char** key);
  * @param key 5x5 matrix key for encryption-decryption
  * @return unsigned* Decrypted message (plaintext)
  */
-unsigned char* playfair_decrypt(unsigned char *ciphertext, unsigned char** key);
+unsigned char* playfair_decrypt(unsigned char* ciphertext, unsigned char** key);
 /**
  * @brief Creates and returns a 5x5 matrix key
  * 
  * @param key Key for encryption-decryption
  * @return unsigned**  5x5 matrix key
  */
-unsigned char** playfair_keymatrix(unsigned char *key);
+unsigned char** playfair_keymatrix(unsigned char* key);
 /**
  * @brief Affine cipher encryption
  * 
  * @param plaintext Message to be encrypted
  * @return uint8_t* Encrypted message (ciphertext)
  */
-uint8_t * affine_encrypt(uint8_t *plaintext);
+uint8_t * affine_encrypt(uint8_t* plaintext);
 /**
  * @brief Affine cipher decryption
  * 
  * @param ciphertext Message to be decrypted
  * @return uint8_t* Decrypted message (plaintext)
  */
-uint8_t * affine_decrypt(uint8_t *ciphertext);
+uint8_t * affine_decrypt(uint8_t* ciphertext);
 /**
  * @brief Feistel cipher encryption
  * 
@@ -112,7 +112,7 @@ uint8_t* round(uint8_t* block, uint8_t* key);
  * @param plaintext Message to be encrypted
  * @return uint8_t* Returns the key
  */
-uint8_t* key_generator(uint8_t *plaintext);
+uint8_t* key_generator(uint8_t* plaintext);
 
 /**
  * @brief Reads the content of the input file and copies it on a string. Then returns
@@ -121,4 +121,4 @@ uint8_t* key_generator(uint8_t *plaintext);
  * @param input_message Pointer on the input file
  * @return uint8_t* Message to be encrypted
  */
-uint8_t *read_plaintext(FILE* input_message);
+uint8_t* read_plaintext(FILE* input_message);
