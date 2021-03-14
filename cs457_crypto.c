@@ -13,6 +13,8 @@
 #include <unistd.h>
 
 #define INIT_INPUT_SIZE 128
+/*#define ONE_TIME_PAD 1
+#define CAESAR_CIPHER 2*/
 
 uint8_t *key_generator(uint8_t *plaintext)
 {
@@ -51,13 +53,12 @@ uint8_t *key_generator(uint8_t *plaintext)
     return key;
 }
 
-
 uint8_t *read_plaintext(FILE *input_message)
 {
     int c;
     int counter;
     long length;
-    uint8_t* plaintext;
+    uint8_t *plaintext;
 
     length = 0;
     if (input_message == stdin)
@@ -83,7 +84,7 @@ uint8_t *read_plaintext(FILE *input_message)
                     exit(EXIT_FAILURE);
                 }
             }
-            *(plaintext + length) = (uint8_t) c;
+            *(plaintext + length) = (uint8_t)c;
             length++;
             c = fgetc(input_message);
         }
@@ -106,19 +107,108 @@ uint8_t *read_plaintext(FILE *input_message)
     return plaintext;
 }
 
+/*uint8_t *otp_encrypt(uint8_t *plaintext, uint8_t *key);
+uint8_t *otp_decrypt(uint8_t *ciphertext, uint8_t *key);*/
+
+int isUppercaseLetter(uint8_t character)
+{
+    if (character >= 65 && character <= 90)
+        return 1;
+    return 0;
+}
+
+int isLowercaseLetter(uint8_t character)
+{
+    if (character >= 97 && character <= 122)
+        return 1;
+    return 0;
+}
+
+int isDigit(uint8_t character)
+{
+    if (character >= 48 && character <= 57)
+        return 1;
+    return 0;
+}
+
+uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N)
+{
+    int len;
+    int count;
+    uint8_t *ciphertext;
+
+    len = strlen(plaintext);
+    ciphertext = malloc(sizeof(uint8_t) * (len + 1));
+    if (!ciphertext)
+    {
+        fprintf(stderr, "Malloc failed at caesar_encrypt().\n");
+        exit(EXIT_FAILURE);
+    }
+
+    count = 0;
+    while (count < len)
+    {
+        if (isDigit(*(plaintext + count)) || isUppercaseLetter(*(plaintext + count)) || isLowercaseLetter(*(plaintext + count)))
+        {
+            *(ciphertext + count) = *(plaintext + count) + N;
+        }
+        else
+        {
+            *(ciphertext + count) = *(plaintext + count);
+        }
+        count++;
+    }
+    *(ciphertext + count) = '\0';
+    return ciphertext;
+}
+
+uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N)
+{
+    int len;
+    int count;
+    uint8_t *plaintext;
+
+    len = strlen(ciphertext);
+    plaintext = malloc(sizeof(uint8_t) * (len + 1));
+    if (!plaintext)
+    {
+        fprintf(stderr, "Malloc failed at caesar_decrypt().\n");
+        exit(EXIT_FAILURE);
+    }
+
+    count = 0;
+    while (count < len)
+    {
+        if (isDigit(*(ciphertext + count)) || isUppercaseLetter(*(ciphertext + count)) || isLowercaseLetter(*(ciphertext + count)))
+        {
+            *(plaintext + count) = *(ciphertext + count) - N;
+        }
+        else
+        {
+            *(plaintext + count) = *(ciphertext + count);
+        }
+        count++;
+    }
+    *(plaintext + count) = '\0';
+    return plaintext;
+}
+
+
 int main(int argc, char *argv[])
 {
-    uint8_t* key;
-    uint8_t* plaintext;
-    FILE* output;
-    FILE* input;
+    uint8_t *key;
+    uint8_t *plaintext;
+    uint8_t *ciphertext;
+    uint8_t *result;
+    FILE *output;
+    FILE *input;
     int opt;
-    char* file_name;
+    char *file_name;
 
     output = stdout;
     input = stdin;
 
-    while ((opt = getopt(argc, argv, "i:o:h")) != -1)
+    while ((opt = getopt(argc, argv, "i:o")) != -1)
     {
         switch (opt)
         {
@@ -142,6 +232,7 @@ int main(int argc, char *argv[])
             }
             free(file_name);
             break;
+
         default:
             printf("Wrong command line arguments. Type -i for input file and -o for output file.\n");
             return -1;
@@ -149,16 +240,23 @@ int main(int argc, char *argv[])
     }
 
     plaintext = read_plaintext(input);
-    key = key_generator(plaintext);
+    /*key = key_generator(plaintext);*/
     printf("Plaintext: %s\n", plaintext);
     printf("Plaintext len: %lu\n", strlen(plaintext));
-    printf("Key: %s\n", key);
+    /*printf("Key: %s\n", key);
     printf("Key len: %lu\n", strlen((char *)key));
-    free(key);
+    free(key);*/
+    ciphertext = caesar_encrypt(plaintext, 4);
+    printf("Ciphertext: %s\n", ciphertext);
+    printf("Ciphertext len: %lu\n", strlen(ciphertext));
+    result = caesar_decrypt(ciphertext, 4);
+    printf("Result: %s\n", result);
+    printf("Result len: %lu\n", strlen(result));
+
     free(plaintext);
+    free(ciphertext);
+    free(result);
     fclose(output);
     fclose(input);
     return 0;
 }
-/*uint8_t *otp_encrypt(uint8_t *plaintext, uint8_t *key);
-uint8_t *otp_decrypt(uint8_t *ciphertext, uint8_t *key);*/

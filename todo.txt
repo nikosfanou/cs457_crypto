@@ -1,2 +1,4 @@
 1) Na dw gia typous opws ushort, unsigned char ktlp.
 2) Na diorthwsw pithanws sxolia.
+3) Na teleiwsw one pad time. Ti ginetai sth periptwsh pou to xor dwsei non printable?
+4) Na teleiwsw caesar. Na paramenei panta mesa sto character set.

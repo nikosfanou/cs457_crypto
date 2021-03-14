@@ -18,6 +18,7 @@
  * @return uint8_t* Encrypted message (ciphertext)
  */
 uint8_t* otp_encrypt(uint8_t* plaintext, uint8_t* key);
+
 /**
  * @brief One-time pad decryption
  * 
@@ -26,6 +27,7 @@ uint8_t* otp_encrypt(uint8_t* plaintext, uint8_t* key);
  * @return uint8_t* Decrypted message (plaintext)
  */
 uint8_t* otp_decrypt(uint8_t* ciphertext, uint8_t * key);
+
 /**
  * @brief Caesar's cipher encryption
  * 
@@ -34,6 +36,7 @@ uint8_t* otp_decrypt(uint8_t* ciphertext, uint8_t * key);
  * @return uint8_t* Encrypted message (ciphertext)
  */
 uint8_t* caesar_encrypt(uint8_t* plaintext, uint16_t N);
+
 /**
  * @brief Caesar's cipher decryption
  * 
@@ -42,6 +45,7 @@ uint8_t* caesar_encrypt(uint8_t* plaintext, uint16_t N);
  * @return uint8_t* Decrypted message (plaintext)
  */
 uint8_t* caesar_decrypt(uint8_t* ciphertext, uint16_t N);
+
 /**
  * @brief Playfair cipher encryption
  * 
@@ -50,6 +54,7 @@ uint8_t* caesar_decrypt(uint8_t* ciphertext, uint16_t N);
  * @return unsigned* Encrypted message (ciphertext)
  */
 unsigned char* playfair_encrypt(unsigned char* plaintext, unsigned char** key);
+
 /**
  * @brief Playfair cipher decryption
  * 
@@ -58,6 +63,7 @@ unsigned char* playfair_encrypt(unsigned char* plaintext, unsigned char** key);
  * @return unsigned* Decrypted message (plaintext)
  */
 unsigned char* playfair_decrypt(unsigned char* ciphertext, unsigned char** key);
+
 /**
  * @brief Creates and returns a 5x5 matrix key
  * 
@@ -65,6 +71,7 @@ unsigned char* playfair_decrypt(unsigned char* ciphertext, unsigned char** key);
  * @return unsigned**  5x5 matrix key
  */
 unsigned char** playfair_keymatrix(unsigned char* key);
+
 /**
  * @brief Affine cipher encryption
  * 
@@ -72,6 +79,7 @@ unsigned char** playfair_keymatrix(unsigned char* key);
  * @return uint8_t* Encrypted message (ciphertext)
  */
 uint8_t * affine_encrypt(uint8_t* plaintext);
+
 /**
  * @brief Affine cipher decryption
  * 
@@ -79,6 +87,7 @@ uint8_t * affine_encrypt(uint8_t* plaintext);
  * @return uint8_t* Decrypted message (plaintext)
  */
 uint8_t * affine_decrypt(uint8_t* ciphertext);
+
 /**
  * @brief Feistel cipher encryption
  * 
@@ -87,6 +96,7 @@ uint8_t * affine_decrypt(uint8_t* ciphertext);
  * @return uint8_t* Encrypted message (ciphertext)
  */
 uint8_t* feistel_encrypt(uint8_t* plaintext, uint8_t keys[]);
+
 /**
  * @brief Feistel cipher decryption
  * 
@@ -95,6 +105,7 @@ uint8_t* feistel_encrypt(uint8_t* plaintext, uint8_t keys[]);
  * @return uint8_t* Decrypted message (plaintext)
  */
 uint8_t* feistel_decrypt(uint8_t* ciphertext, uint8_t keys[]);
+
 /**
  * @brief The round function is run on half of the data to be
  * encrypted and its output is XORed with the other half of
@@ -122,3 +133,27 @@ uint8_t* key_generator(uint8_t* plaintext);
  * @return uint8_t* Message to be encrypted
  */
 uint8_t* read_plaintext(FILE* input_message);
+
+/**
+ * @brief Checks if character is digit.
+ * 
+ * @param character A simple unsigned char
+ * @return int Returns 1 if character is digit, else 0.
+ */
+int isDigit(uint8_t character);
+
+/**
+ * @brief Checks if character is lowercase letter.
+ * 
+ * @param character A simple unsigned char
+ * @return int Returns 1 if character is lowercase letter, else 0.
+ */
+int isLowercaseLetter(uint8_t character);
+
+/**
+ * @brief Checks if character is uppercase letter.
+ * 
+ * @param character A simple unsigned char
+ * @return int Returns 1 if character is uppercase letter, else 0.
+ */
+int isUppercaseLetter(uint8_t character);
