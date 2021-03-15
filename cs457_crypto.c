@@ -13,6 +13,14 @@
 #include <unistd.h>
 
 #define INIT_INPUT_SIZE 128
+#define DIGIT_START 48 /* Start of digits in ascii table */
+#define DIGIT_END 57   /* End of digits in ascii table */
+#define UPPERCASE_START 65
+#define LOWERCASE_START 97
+#define UPPERCASE_END 90
+#define LOWERCASE_END 122
+#define NUM_OF_DIGITS 10
+#define NUM_OF_LETTERS 26
 /*#define ONE_TIME_PAD 1
 #define CAESAR_CIPHER 2*/
 
@@ -112,21 +120,21 @@ uint8_t *otp_decrypt(uint8_t *ciphertext, uint8_t *key);*/
 
 int isUppercaseLetter(uint8_t character)
 {
-    if (character >= 65 && character <= 90)
+    if (character >= UPPERCASE_START && character <= UPPERCASE_END)
         return 1;
     return 0;
 }
 
 int isLowercaseLetter(uint8_t character)
 {
-    if (character >= 97 && character <= 122)
+    if (character >= LOWERCASE_START && character <= LOWERCASE_END)
         return 1;
     return 0;
 }
 
 int isDigit(uint8_t character)
 {
-    if (character >= 48 && character <= 57)
+    if (character >= DIGIT_START && character <= DIGIT_END)
         return 1;
     return 0;
 }
@@ -136,6 +144,7 @@ uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N)
     int len;
     int count;
     uint8_t *ciphertext;
+    uint8_t character;
 
     len = strlen(plaintext);
     ciphertext = malloc(sizeof(uint8_t) * (len + 1));
@@ -148,13 +157,28 @@ uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N)
     count = 0;
     while (count < len)
     {
-        if (isDigit(*(plaintext + count)) || isUppercaseLetter(*(plaintext + count)) || isLowercaseLetter(*(plaintext + count)))
+        character = *(plaintext + count);
+        if (isDigit(character))
         {
-            *(ciphertext + count) = *(plaintext + count) + N;
+            *(ciphertext + count) = character + (N % NUM_OF_DIGITS);
+            if (*(ciphertext + count) > DIGIT_END)
+                *(ciphertext + count) = (*(ciphertext + count) % (DIGIT_END + 1)) + DIGIT_START;
+        }
+        else if (isUppercaseLetter(character))
+        {
+            *(ciphertext + count) = character + (N % NUM_OF_LETTERS);
+            if (*(ciphertext + count) > UPPERCASE_END)
+                *(ciphertext + count) = (*(ciphertext + count) % (UPPERCASE_END + 1)) + UPPERCASE_START;
+        }
+        else if (isLowercaseLetter(character))
+        {
+            *(ciphertext + count) = character + (N % NUM_OF_LETTERS);
+            if (*(ciphertext + count) > LOWERCASE_END)
+                *(ciphertext + count) = (*(ciphertext + count) % (LOWERCASE_END + 1)) + LOWERCASE_START;
         }
         else
         {
-            *(ciphertext + count) = *(plaintext + count);
+            *(ciphertext + count) = character;
         }
         count++;
     }
@@ -167,6 +191,7 @@ uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N)
     int len;
     int count;
     uint8_t *plaintext;
+    uint8_t character;
 
     len = strlen(ciphertext);
     plaintext = malloc(sizeof(uint8_t) * (len + 1));
@@ -179,20 +204,35 @@ uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N)
     count = 0;
     while (count < len)
     {
-        if (isDigit(*(ciphertext + count)) || isUppercaseLetter(*(ciphertext + count)) || isLowercaseLetter(*(ciphertext + count)))
+        character = *(ciphertext + count);
+        if (isDigit(character))
         {
-            *(plaintext + count) = *(ciphertext + count) - N;
+            *(plaintext + count) = character - ( N % NUM_OF_DIGITS);
+            if (*(plaintext + count) < DIGIT_START)
+                *(plaintext + count) = (*(plaintext + count) - DIGIT_START + 1) % NUM_OF_DIGITS + DIGIT_END;
+
+        }
+        else if (isUppercaseLetter(character))
+        {
+            *(plaintext + count) = character - ( N % NUM_OF_LETTERS);
+            if (*(plaintext + count) < UPPERCASE_START)
+                *(plaintext + count) = (*(plaintext + count) - UPPERCASE_START + 1) % NUM_OF_LETTERS + UPPERCASE_END;
+        }
+        else if (isLowercaseLetter(character))
+        {
+            *(plaintext + count) = character - ( N % NUM_OF_LETTERS);
+            if (*(plaintext + count) < LOWERCASE_START)
+                *(plaintext + count) = (*(plaintext + count) - LOWERCASE_START + 1) % NUM_OF_LETTERS + LOWERCASE_END;
         }
         else
         {
-            *(plaintext + count) = *(ciphertext + count);
+            *(plaintext + count) = character;
         }
         count++;
     }
     *(plaintext + count) = '\0';
     return plaintext;
 }
-
 
 int main(int argc, char *argv[])
 {
@@ -232,7 +272,6 @@ int main(int argc, char *argv[])
             }
             free(file_name);
             break;
-
         default:
             printf("Wrong command line arguments. Type -i for input file and -o for output file.\n");
             return -1;
@@ -246,10 +285,10 @@ int main(int argc, char *argv[])
     /*printf("Key: %s\n", key);
     printf("Key len: %lu\n", strlen((char *)key));
     free(key);*/
-    ciphertext = caesar_encrypt(plaintext, 4);
+    ciphertext = caesar_encrypt(plaintext, 65535);
     printf("Ciphertext: %s\n", ciphertext);
     printf("Ciphertext len: %lu\n", strlen(ciphertext));
-    result = caesar_decrypt(ciphertext, 4);
+    result = caesar_decrypt(ciphertext, 65535);
     printf("Result: %s\n", result);
     printf("Result len: %lu\n", strlen(result));
 
@@ -260,3 +299,12 @@ int main(int argc, char *argv[])
     fclose(input);
     return 0;
 }
+
+/* Paizei sigoura isws na einai epikindino gia megala N 
+
+if(character + N > UPPERCASE_END)
+    *(ciphertext + count) = ( (character + N) % (UPPERCASE_END + 1) % NUM_OF_LETTERS ) + UPPERCASE_START; 
+else
+    *(ciphertext + count) = character + N;
+
+*/
