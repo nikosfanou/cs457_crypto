@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 /* Some helpful functions */
 
@@ -26,6 +27,7 @@ uint8_t *key_generator(uint8_t *plaintext)
     size_t randomDataLen;
     size_t read_result;
 
+    assert(plaintext);
     key_size = strlen((char *)plaintext);
     randomData = fopen("/dev/urandom", "r");
 
@@ -69,6 +71,7 @@ uint8_t *read_plaintext(FILE *input_message)
     size_t length;
     uint8_t *plaintext;
 
+    assert(input_message);
     length = 0;
     if (input_message == stdin)
     {

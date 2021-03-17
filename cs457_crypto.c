@@ -9,12 +9,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 uint8_t *otp_encrypt(uint8_t *plaintext, uint8_t *key)
 {
     size_t length, counter;
     uint8_t *ciphertext;
 
+    assert(key);
+    assert(plaintext);
     length = strlen((char *)plaintext); /* h to length tou key? */
     ciphertext = malloc(sizeof(uint8_t) * (length + 1));
     counter = 0;
@@ -32,6 +35,8 @@ uint8_t *otp_decrypt(uint8_t *ciphertext, uint8_t *key)
     size_t length, counter;
     uint8_t *plaintext;
 
+    assert(key);
+    assert(ciphertext);
     length = strlen((char *)key);
     plaintext = malloc(sizeof(uint8_t) * (length + 1));
     counter = 0;
@@ -51,6 +56,7 @@ uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N)
     uint8_t *ciphertext;
     uint8_t character;
 
+    assert(plaintext);
     len = strlen((char *)plaintext);
     ciphertext = malloc(sizeof(uint8_t) * (len + 1));
     if (!ciphertext)
@@ -98,6 +104,7 @@ uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N)
     uint8_t *plaintext;
     uint8_t character;
 
+    assert(ciphertext);
     len = strlen((char *)ciphertext);
     plaintext = malloc(sizeof(uint8_t) * (len + 1));
     if (!plaintext)

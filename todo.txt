@@ -1,8 +1,6 @@
 1) Na dw gia typous opws ushort, unsigned char ktlp.
 2) Na diorthwsw pithanws sxolia.
-3) Na teleiwsw one pad time. Ti ginetai sth periptwsh pou to xor dwsei non printable? -> ta petame
 4) An sto feistel theloun na kryptografountai ola tote na valw sta key generator kai read plaintext ena akomh orisma to uint32_t input_size
     gia na ftiaksw swsto kleidi afou h strlen mporei na dwsei mikrotero megethos logw '\0'.
     Alliws tha th kanw na krataei mono digit, letters kai den yparxoyn kindynoi logw eidikwn symbolwn.
-5) Na prosthesw assert
 6) Na diorthwsw makefile
