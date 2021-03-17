@@ -144,3 +144,68 @@ uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N)
     *(plaintext + count) = '\0';
     return plaintext;
 }
+
+unsigned char **playfair_keymatrix(unsigned char *key)
+{
+    size_t length, counter, matrix_char;
+    unsigned char **key_matrix;
+    int alphabet_table[NUM_OF_LETTERS - 1];
+
+    memset(alphabet_table, 0, NUM_OF_LETTERS - 1);
+    length = strlen((char *)key);
+    matrix_char = 0;
+
+    /* Key matrix is 5x5 */
+    key_matrix = (unsigned char **)malloc(5 * sizeof(unsigned char *));
+    for (counter = 0; counter < 5; counter++)
+    {
+        *(key_matrix + counter) = (unsigned char *)malloc(5 * sizeof(unsigned char));
+    }
+
+    for (counter = 0; counter < length; counter++)
+    {
+        if(!isUppercaseLetter(*(key + counter)))
+            continue;
+
+        if (*(key + counter) == 'J')
+        {
+            if (!alphabet_table[*(key + counter) - 1 - UPPERCASE_START])
+            {
+                /* key_matrix[matrix_char / 5][matrix_char % 5] = *(key + counter) - 1; */
+                *( *(key_matrix + (matrix_char / 5) ) + (matrix_char % 5) ) = *(key + counter) - 1;
+                matrix_char++;
+                alphabet_table[*(key + counter) - 1 - UPPERCASE_START] = 1;
+            }
+        }
+        else
+        {
+            if (!alphabet_table[*(key + counter) - UPPERCASE_START])
+            {
+                /* key_matrix[matrix_char / 5][matrix_char % 5] = *(key + counter); */
+                *( *(key_matrix + (matrix_char / 5) ) + (matrix_char % 5) ) = *(key + counter);
+                matrix_char++;
+                alphabet_table[*(key + counter) - UPPERCASE_START] = 1;
+            }
+        }
+    }
+
+    for (counter = 0; counter < NUM_OF_LETTERS - 1; counter++)
+    {
+        if (!alphabet_table[counter])
+        {
+            /* key_matrix[matrix_char / 5][matrix_char % 5] = UPPERCASE_START + counter; */
+            *( *(key_matrix + (matrix_char / 5) ) + (matrix_char % 5) ) = UPPERCASE_START + counter;
+            matrix_char++;
+        }
+    }
+
+    return key_matrix;
+}
+
+/*
+    An einai idia sth dyada vazoume X
+    An plaintext einai monos arithmos tote vazoume X gia na symplhrwthei h dyada
+    Ara se oles tis dyades antikathistoyme to X me ton aristero char ektos th teleytaia fora
+    kai mono an exoyme length mono arithmo.
+    Gia ta alla akolouthoume tous kanones tou pinaka
+*/

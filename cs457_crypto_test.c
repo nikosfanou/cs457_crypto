@@ -50,10 +50,6 @@ uint8_t *key_generator(uint8_t *plaintext)
     }
     *(key + key_size) = '\0';
     fclose(randomData);
-    /*printf("Plaintext: %s\n", plaintext);
-    printf("Plaintext len: %lu\n", strlen(plaintext));
-    printf("Key: %s\n", key);
-    printf("Key len: %lu\n", strlen((char *)key));*/
     return key;
 }
 
@@ -130,10 +126,12 @@ int main(int argc, char *argv[])
     int opt;
     char *file_name;
     int algorithm;
+    size_t counter;
+    unsigned char **key_matrix;
 
     output = stdout;
     input = stdin;
-    algorithm = ONE_TIME_PAD;
+    algorithm = PLAYFAIR_CIPHER;
     while ((opt = getopt(argc, argv, "i:o:1:c:p:a:f:h")) != -1)
     {
         switch (opt)
@@ -205,13 +203,26 @@ int main(int argc, char *argv[])
         fprintf(output, "Ciphertext:\n%s\n", ciphertext);
         fprintf(output, "Ciphertext len: %lu\n\n", strlen((char *)ciphertext));
         result = caesar_decrypt(ciphertext, NUM);
+    }else if (algorithm == PLAYFAIR_CIPHER){
+        printf("You chose playfair cipher algorithm for your encryption.\n");
+        key_matrix = playfair_keymatrix("hello world");
+        /*
+            encrypt
+            decrypt
+        */
+        /*for (counter = 0; counter < 5; counter++)
+        {
+            free(key_matrix + counter);
+        }*/
+       /*free(key_matrix);*/
     }
-    fprintf(output, "Message:\n%s\n", result);
-    fprintf(output, "Result len: %lu\n", strlen((char *)result));
+
+    /*fprintf(output, "Message:\n%s\n", result);
+    fprintf(output, "Result len: %lu\n", strlen((char *)result));*/
 
     free(plaintext);
-    free(ciphertext);
-    free(result);
+    /*free(ciphertext);
+    free(result);*/
     fclose(output);
     fclose(input);
     return 0;

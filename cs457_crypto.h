@@ -112,7 +112,7 @@ uint8_t* caesar_decrypt(uint8_t* ciphertext, uint16_t N);
  * @param key Key for encryption-decryption
  * @return unsigned**  5x5 matrix key
  */
-/* unsigned char** playfair_keymatrix(unsigned char* key); */
+unsigned char** playfair_keymatrix(unsigned char* key);
 
 /**
  * @brief Affine cipher encryption
