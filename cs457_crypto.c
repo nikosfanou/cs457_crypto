@@ -10,18 +10,44 @@
 #include <stdlib.h>
 #include <string.h>
 
+uint8_t *otp_encrypt(uint8_t *plaintext, uint8_t *key)
+{
+    size_t length, counter;
+    uint8_t *ciphertext;
 
-
-uint8_t *otp_encrypt(uint8_t *plaintext, uint8_t *key){
-    
+    length = strlen((char *)plaintext); /* h to length tou key? */
+    ciphertext = malloc(sizeof(uint8_t) * (length + 1));
+    counter = 0;
+    while (counter < length)
+    {
+        *(ciphertext + counter) = *(plaintext + counter) ^ *(key + counter);
+        counter++;
+    }
+    *(ciphertext + counter) = '\0';
+    return ciphertext;
 }
-/*uint8_t *otp_decrypt(uint8_t *ciphertext, uint8_t *key);*/
 
+uint8_t *otp_decrypt(uint8_t *ciphertext, uint8_t *key)
+{
+    size_t length, counter;
+    uint8_t *plaintext;
+
+    length = strlen((char *)key);
+    plaintext = malloc(sizeof(uint8_t) * (length + 1));
+    counter = 0;
+    while (counter < length)
+    {
+        *(plaintext + counter) = *(ciphertext + counter) ^ *(key + counter);
+        counter++;
+    }
+    *(plaintext + counter) = '\0';
+    return plaintext;
+}
 
 uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N)
 {
-    int len;
-    int count;
+    size_t len;
+    size_t count;
     uint8_t *ciphertext;
     uint8_t character;
 
@@ -67,8 +93,8 @@ uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N)
 
 uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N)
 {
-    int len;
-    int count;
+    size_t len;
+    size_t count;
     uint8_t *plaintext;
     uint8_t character;
 
@@ -111,12 +137,3 @@ uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N)
     *(plaintext + count) = '\0';
     return plaintext;
 }
-
-/* Paizei sigoura isws na einai epikindino gia megala N 
-
-if(character + N > UPPERCASE_END)
-    *(ciphertext + count) = ( (character + N) % (UPPERCASE_END + 1) % NUM_OF_LETTERS ) + UPPERCASE_START; 
-else
-    *(ciphertext + count) = character + N;
-
-*/

@@ -13,6 +13,7 @@
 /* N in the range of 0 to 65,535 */
 #define NUM 12
 #define INIT_INPUT_SIZE 128
+/* #define ushort unsigned short/uint16_t */
 
 #define DIGIT_START 48 /* Start of digits in ascii table */
 #define DIGIT_END 57   /* End of digits in ascii table */
@@ -58,7 +59,7 @@
  * @param key Key for encryption-decryption
  * @return uint8_t* Encrypted message (ciphertext)
  */
-/*uint8_t* otp_encrypt(uint8_t* plaintext, uint8_t* key);*/
+uint8_t* otp_encrypt(uint8_t* plaintext, uint8_t* key);
 
 /**
  * @brief One-time pad decryption
@@ -67,7 +68,7 @@
  * @param key Key for encryption-decryption
  * @return uint8_t* Decrypted message (plaintext)
  */
-/* uint8_t* otp_decrypt(uint8_t* ciphertext, uint8_t * key); */
+uint8_t* otp_decrypt(uint8_t* ciphertext, uint8_t * key);
 
 /**
  * @brief Caesar's cipher encryption

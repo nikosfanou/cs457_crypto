@@ -1,9 +1,0 @@
-Plaintext: ABCDEFGHIJKLMNOPQRSTVUWXYZ
-Plaintext len: 26
-
-Ciphertext: PQRSTUVWXYZABCDEFGHIKJLMNO
-Ciphertext len: 26
-
-Message: ABCDEFGHIJKLMNOPQRSTVUWXYZ
-Result len: 26
-

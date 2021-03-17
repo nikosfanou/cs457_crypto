@@ -20,7 +20,7 @@
  */
 uint8_t *key_generator(uint8_t *plaintext)
 {
-    int key_size;
+    size_t key_size;
     uint8_t *key;
     FILE *randomData;
     size_t randomDataLen;
@@ -40,7 +40,7 @@ uint8_t *key_generator(uint8_t *plaintext)
     while (randomDataLen < key_size)
     {
         read_result = fread(key + randomDataLen, sizeof(uint8_t), sizeof(uint8_t), randomData);
-        if (*(key + randomDataLen) == '\0')
+        if (*(key + randomDataLen) == '\0') /*  ayto mporei na fygei tlk an h readplaintext de krataei ta special character. */
         {
             continue;
         }
@@ -66,7 +66,7 @@ uint8_t *read_plaintext(FILE *input_message)
 {
     int c;
     int counter;
-    long length;
+    size_t length;
     uint8_t *plaintext;
 
     length = 0;
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
 
     output = stdout;
     input = stdin;
-    algorithm = CAESAR_CIPHER;
+    algorithm = ONE_TIME_PAD;
     while ((opt = getopt(argc, argv, "i:o:1:c:p:a:f:h")) != -1)
     {
         switch (opt)
@@ -188,10 +188,10 @@ int main(int argc, char *argv[])
         key = key_generator(plaintext);
         fprintf(output, "Key: %s\n", key);
         fprintf(output, "Key len: %lu\n\n", strlen((char *)key));
-        /*
-            encrypt
-            decrypt
-        */
+        ciphertext = otp_encrypt(plaintext, key);
+        fprintf(output, "Ciphertext:\n%s\n", ciphertext);
+        fprintf(output, "Ciphertext len: %lu\n\n", strlen((char *)ciphertext));
+        result = otp_decrypt(ciphertext, key);
         free(key);
     }
     else if (algorithm == CAESAR_CIPHER)
@@ -205,7 +205,6 @@ int main(int argc, char *argv[])
     }
     fprintf(output, "Message:\n%s\n", result);
     fprintf(output, "Result len: %lu\n", strlen((char *)result));
-    printf("Xor: %u\n",3^1);
 
     free(plaintext);
     free(ciphertext);
