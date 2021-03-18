@@ -151,6 +151,7 @@ unsigned char **playfair_keymatrix(unsigned char *key)
     unsigned char **key_matrix;
     int alphabet_table[NUM_OF_LETTERS];
 
+    assert(key);
     for (counter = 0; counter < NUM_OF_LETTERS; counter++)
     {
         alphabet_table[counter] = 0;
@@ -177,7 +178,6 @@ unsigned char **playfair_keymatrix(unsigned char *key)
             if (!alphabet_table[*(key + counter) - UPPERCASE_START])
             {
                 key_matrix[matrix_char / 5][matrix_char % 5] = *(key + counter);
-                /**( *(key_matrix + (matrix_char / 5) ) + (matrix_char % 5) ) = *(key + counter);*/
                 matrix_char++;
                 alphabet_table[*(key + counter) - UPPERCASE_START] = 1;
                 if (*(key + counter) == 73) /* 73 is I code on Ascii table */
@@ -189,7 +189,6 @@ unsigned char **playfair_keymatrix(unsigned char *key)
             if (!alphabet_table[*(key + counter) - UPPERCASE_START])
             {
                 key_matrix[matrix_char / 5][matrix_char % 5] = *(key + counter) - 1;
-                /**( *(key_matrix + (matrix_char / 5) ) + (matrix_char % 5) ) = *(key + counter) - 1;*/
                 matrix_char++;
                 alphabet_table[*(key + counter) - 1 - UPPERCASE_START] = 1;
                 alphabet_table[*(key + counter) - UPPERCASE_START] = 1;
@@ -202,8 +201,7 @@ unsigned char **playfair_keymatrix(unsigned char *key)
         if (!alphabet_table[counter])
         {
             key_matrix[matrix_char / 5][matrix_char % 5] = UPPERCASE_START + counter;
-            /**( *(key_matrix + (matrix_char / 5) ) + (matrix_char % 5) ) = UPPERCASE_START + counter;*/
-            if(counter == 8) /* I is the 9th letter in the alphabet. */
+            if (counter == 8) /* I is the 9th letter in the alphabet. */
                 alphabet_table[counter + 1] = 1;
             matrix_char++;
         }
@@ -213,9 +211,50 @@ unsigned char **playfair_keymatrix(unsigned char *key)
 }
 
 /*
-    An einai idia sth dyada vazoume X
-    An plaintext einai monos arithmos tote vazoume X gia na symplhrwthei h dyada
     Ara se oles tis dyades antikathistoyme to X me ton aristero char ektos th teleytaia fora
     kai mono an exoyme length mono arithmo.
     Gia ta alla akolouthoume tous kanones tou pinaka
 */
+
+unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
+{
+    size_t length, counter, ciphertext_size;
+    unsigned char *ciphertext;
+
+    assert(plaintext);
+    assert(key);
+    length = strlen((char *)plaintext);
+    ciphertext_size = 0;
+
+    if (isOdd(length))
+        ciphertext = malloc(sizeof(unsigned char) * (length + 2));
+    else
+        ciphertext = malloc(sizeof(unsigned char) * (length + 1));
+
+    for (counter = 0; counter < length; counter++)
+    {
+        /* kratame mono ta kefalaia */
+        if (!isUppercaseLetter(*(plaintext + counter)))
+            continue;
+        *(ciphertext + ciphertext_size) = *(plaintext + counter);
+        ciphertext_size++;
+    }
+
+    for (counter = 0; counter < ciphertext_size; counter = counter + 2)
+    {
+        /*  counter panta zygos ara an mpei sthn epomenh if logw tou prwtou
+            to ciphertext_size einai monos arithmos kai ftasame sth teleytaia dyada. */
+        if ((counter == ciphertext_size - 1) || (*(ciphertext + counter) == *(ciphertext + counter + 1)))
+        {
+            *(ciphertext + counter + 1) = 'X';
+        }
+    }
+
+    /* An einai monos arithmos vazoume ena X sto telos kai meta to terminal */
+    *(ciphertext + ciphertext_size + isOdd(ciphertext_size)) = '\0';
+    return ciphertext;
+}
+
+unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
+{
+}

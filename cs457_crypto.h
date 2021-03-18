@@ -52,6 +52,9 @@
 #define isDigit(character) \
     (character >= DIGIT_START && character <= DIGIT_END)
 
+#define isOdd(number) \
+    (number % 2)
+
 /**
  * @brief One-time pad encryption
  * 
@@ -95,7 +98,7 @@ uint8_t* caesar_decrypt(uint8_t* ciphertext, uint16_t N);
  * @param key 5x5 matrix key for encryption-decryption
  * @return unsigned* Encrypted message (ciphertext)
  */
-/* unsigned char* playfair_encrypt(unsigned char* plaintext, unsigned char** key); */
+unsigned char* playfair_encrypt(unsigned char* plaintext, unsigned char** key);
 
 /**
  * @brief Playfair cipher decryption
@@ -104,7 +107,7 @@ uint8_t* caesar_decrypt(uint8_t* ciphertext, uint16_t N);
  * @param key 5x5 matrix key for encryption-decryption
  * @return unsigned* Decrypted message (plaintext)
  */
-/* unsigned char* playfair_decrypt(unsigned char* ciphertext, unsigned char** key); */
+unsigned char* playfair_decrypt(unsigned char* ciphertext, unsigned char** key);
 
 /**
  * @brief Creates and returns a 5x5 matrix key
