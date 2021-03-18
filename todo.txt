@@ -2,5 +2,6 @@
 2) Na diorthwsw pithanws sxolia.
 3) Sto feistel theloun na kryptografountai ola ?
 4) Na prosthesw elegxous gia fail malloc
-5) An sto playfair thelei na ginetai decrypt to J tote tha valw mia stack na krataei to position toy sto ciphertext.
-    An exoume AX pws kseroume oti to X den einai xarakthras kai einai to diplo A? Mallon stack kai gia to X. --> erwthsh
+5) An sto playfair thelei na ginetai decrypt to J tote tha valw mia stack na krataei to position toy sto ciphertext. --> erwthsh
+    Deyterh erwthsh to XX to kryptografoume kai an nai pws? --> erwthsh
+    An exoume AX pws kseroume oti to X den einai xarakthras kai einai to diplo A? Mallon stack kai gia to X.
