@@ -115,6 +115,17 @@ uint8_t *read_plaintext(FILE *input_message)
     return plaintext;
 }
 
+void print_keymatrix(unsigned char **key_matrix){
+    uint32_t counter;
+    printf("Keymatrix:\n");
+    for(counter = 0; counter < 25; counter++){
+        printf("%c", key_matrix[counter / 5][counter % 5]);
+        if( (counter % 5) == 4 )
+            printf("\n");
+    }
+    return;
+}
+
 int main(int argc, char *argv[])
 {
     uint8_t *key;
@@ -132,7 +143,7 @@ int main(int argc, char *argv[])
     output = stdout;
     input = stdin;
     algorithm = PLAYFAIR_CIPHER;
-    while ((opt = getopt(argc, argv, "i:o:1:c:p:a:f:h")) != -1)
+    while ((opt = getopt(argc, argv, "i:o:1cpafh")) != -1)
     {
         switch (opt)
         {
@@ -172,7 +183,20 @@ int main(int argc, char *argv[])
             algorithm = FEISTEL_CIPHER;
             break;
         case 'h':
-            printf("Usage:\n[-i]: The input file. By default input file stream is stdin.\n[-o]: The output file. By default output file stream is stdout.\n[-h]: Prints the help prompt.\n");
+            printf (
+            "Options:\n"
+            "   -i \"inputfile\"      The input file.\n"
+            "   -o \"outputfile\"     The output file.\n"
+            "   -1                  If set, the program uses one time pad algorithm for the cryptography.\n"
+            "   -c                  If set, the program uses caesar's cipher algorithm for the cryptography.\n"
+            "   -p                  If set, the program uses playfair cipher algorithm for the cryptography.\n"
+            "   -a                  If set, the program uses affine cipher algorithm for the cryptography.\n"
+            "   -f                  If set, the program uses feistel cipher algorithm for the cryptography.\n"
+            "   -h                  Prints this help\n"
+            "By default:\n"
+            "   Input file stream is stdin.\n"
+            "   Output file stream is stdout.\n"
+            "   Cryptography algorithm is one time pad.\n");
             return 0;
         default:
             printf("Wrong command line arguments. Type -i for input file and -o for output file.\n");
@@ -205,21 +229,21 @@ int main(int argc, char *argv[])
         result = caesar_decrypt(ciphertext, NUM);
     }else if (algorithm == PLAYFAIR_CIPHER){
         printf("You chose playfair cipher algorithm for your encryption.\n");
-        key_matrix = playfair_keymatrix("hello world");
+        key_matrix = playfair_keymatrix((unsigned char*)"HELLO WORLD");
+        print_keymatrix(key_matrix);
         /*
             encrypt
             decrypt
         */
-        /*for (counter = 0; counter < 5; counter++)
+        for (counter = 0; counter < 5; counter++)
         {
-            free(key_matrix + counter);
-        }*/
-       /*free(key_matrix);*/
+            free(*(key_matrix + counter));
+        }
+       free(key_matrix);
     }
 
     /*fprintf(output, "Message:\n%s\n", result);
     fprintf(output, "Result len: %lu\n", strlen((char *)result));*/
-
     free(plaintext);
     /*free(ciphertext);
     free(result);*/

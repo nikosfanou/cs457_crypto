@@ -18,7 +18,7 @@ uint8_t *otp_encrypt(uint8_t *plaintext, uint8_t *key)
 
     assert(key);
     assert(plaintext);
-    length = strlen((char *)plaintext); /* h to length tou key? */
+    length = strlen((char *)plaintext);
     ciphertext = malloc(sizeof(uint8_t) * (length + 1));
     counter = 0;
     while (counter < length)
@@ -149,11 +149,16 @@ unsigned char **playfair_keymatrix(unsigned char *key)
 {
     size_t length, counter, matrix_char;
     unsigned char **key_matrix;
-    int alphabet_table[NUM_OF_LETTERS - 1];
+    int alphabet_table[NUM_OF_LETTERS];
 
-    memset(alphabet_table, 0, NUM_OF_LETTERS - 1);
+    for (counter = 0; counter < NUM_OF_LETTERS; counter++)
+    {
+        alphabet_table[counter] = 0;
+    }
     length = strlen((char *)key);
     matrix_char = 0;
+
+    printf("Key of keymatrix: %s\n", key);
 
     /* Key matrix is 5x5 */
     key_matrix = (unsigned char **)malloc(5 * sizeof(unsigned char *));
@@ -164,37 +169,42 @@ unsigned char **playfair_keymatrix(unsigned char *key)
 
     for (counter = 0; counter < length; counter++)
     {
-        if(!isUppercaseLetter(*(key + counter)))
+        if (!isUppercaseLetter(*(key + counter)))
             continue;
 
-        if (*(key + counter) == 'J')
-        {
-            if (!alphabet_table[*(key + counter) - 1 - UPPERCASE_START])
-            {
-                /* key_matrix[matrix_char / 5][matrix_char % 5] = *(key + counter) - 1; */
-                *( *(key_matrix + (matrix_char / 5) ) + (matrix_char % 5) ) = *(key + counter) - 1;
-                matrix_char++;
-                alphabet_table[*(key + counter) - 1 - UPPERCASE_START] = 1;
-            }
-        }
-        else
+        if (*(key + counter) != 74) /* 74 is J code on Ascii table */
         {
             if (!alphabet_table[*(key + counter) - UPPERCASE_START])
             {
-                /* key_matrix[matrix_char / 5][matrix_char % 5] = *(key + counter); */
-                *( *(key_matrix + (matrix_char / 5) ) + (matrix_char % 5) ) = *(key + counter);
+                key_matrix[matrix_char / 5][matrix_char % 5] = *(key + counter);
+                /**( *(key_matrix + (matrix_char / 5) ) + (matrix_char % 5) ) = *(key + counter);*/
                 matrix_char++;
+                alphabet_table[*(key + counter) - UPPERCASE_START] = 1;
+                if (*(key + counter) == 73) /* 73 is I code on Ascii table */
+                    alphabet_table[*(key + counter) + 1 - UPPERCASE_START] = 1;
+            }
+        }
+        else /* reach here if read J */
+        {
+            if (!alphabet_table[*(key + counter) - UPPERCASE_START])
+            {
+                key_matrix[matrix_char / 5][matrix_char % 5] = *(key + counter) - 1;
+                /**( *(key_matrix + (matrix_char / 5) ) + (matrix_char % 5) ) = *(key + counter) - 1;*/
+                matrix_char++;
+                alphabet_table[*(key + counter) - 1 - UPPERCASE_START] = 1;
                 alphabet_table[*(key + counter) - UPPERCASE_START] = 1;
             }
         }
     }
 
-    for (counter = 0; counter < NUM_OF_LETTERS - 1; counter++)
+    for (counter = 0; counter < NUM_OF_LETTERS; counter++)
     {
         if (!alphabet_table[counter])
         {
-            /* key_matrix[matrix_char / 5][matrix_char % 5] = UPPERCASE_START + counter; */
-            *( *(key_matrix + (matrix_char / 5) ) + (matrix_char % 5) ) = UPPERCASE_START + counter;
+            key_matrix[matrix_char / 5][matrix_char % 5] = UPPERCASE_START + counter;
+            /**( *(key_matrix + (matrix_char / 5) ) + (matrix_char % 5) ) = UPPERCASE_START + counter;*/
+            if(counter == 8) /* I is the 9th letter in the alphabet. */
+                alphabet_table[counter + 1] = 1;
             matrix_char++;
         }
     }
