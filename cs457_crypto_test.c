@@ -58,7 +58,7 @@ uint8_t *key_generator(uint8_t *plaintext)
  * the string.
  * 
  * @param input_message Pointer on the input file
- * @return uint8_t* Message to be encrypted
+ * @return uint8_t*     Message to be encrypted
  */
 uint8_t *read_plaintext(FILE *input_message)
 {
@@ -115,12 +115,17 @@ uint8_t *read_plaintext(FILE *input_message)
     return plaintext;
 }
 
+/**
+ * @brief Prints the 5x5 keymatrix
+ * 
+ * @param key_matrix 5x5 matrix key
+ */
 void print_keymatrix(unsigned char **key_matrix){
     uint32_t counter;
     printf("Keymatrix:\n");
-    for(counter = 0; counter < 25; counter++){
-        printf("%c", key_matrix[counter / 5][counter % 5]);
-        if( (counter % 5) == 4 )
+    for(counter = 0; counter < KEYMATRIX_SIZE; counter++){
+        printf("%c", key_matrix[counter / KEYMATRIX_ROWS][counter % KEYMATRIX_COLUMNS]);
+        if( (counter % KEYMATRIX_COLUMNS) == 4 )
             printf("\n");
     }
     return;

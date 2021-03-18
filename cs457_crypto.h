@@ -23,6 +23,9 @@
 #define LOWERCASE_END 122
 #define NUM_OF_DIGITS 10
 #define NUM_OF_LETTERS 26
+#define KEYMATRIX_SIZE 25
+#define KEYMATRIX_ROWS 5
+#define KEYMATRIX_COLUMNS 5
 
 #define ONE_TIME_PAD 1
 #define CAESAR_CIPHER 2
@@ -52,102 +55,131 @@
 #define isDigit(character) \
     (character >= DIGIT_START && character <= DIGIT_END)
 
+/**
+ * @brief Checks if number is odd.
+ * 
+ */
 #define isOdd(number) \
     (number % 2)
 
 /**
+ * @brief Checks if the two uppercase letters are in the same row in keymatrix.
+ * 
+ */
+#define sameKeyMatrixRow(row1, row2) \
+    (row1 == row2)
+
+/**
+ * @brief Checks if the two uppercase letters are in the same column in keymatrix.
+ * 
+ */
+#define sameKeyMatrixColumn(column1, column2) \
+    (column1 == column2)
+
+
+/**
  * @brief One-time pad encryption
  * 
- * @param plaintext Message to be encrypted
- * @param key Key for encryption-decryption
- * @return uint8_t* Encrypted message (ciphertext)
+ * @param plaintext     Message to be encrypted
+ * @param key Key for   encryption-decryption
+ * @return uint8_t*     Encrypted message (ciphertext)
  */
 uint8_t* otp_encrypt(uint8_t* plaintext, uint8_t* key);
 
 /**
  * @brief One-time pad decryption
  * 
- * @param ciphertext Message to be decrypted
- * @param key Key for encryption-decryption
- * @return uint8_t* Decrypted message (plaintext)
+ * @param ciphertext    Message to be decrypted
+ * @param key Key for   encryption-decryption
+ * @return uint8_t*     Decrypted message (plaintext)
  */
 uint8_t* otp_decrypt(uint8_t* ciphertext, uint8_t * key);
 
 /**
  * @brief Caesar's cipher encryption
  * 
- * @param plaintext Message to be encrypted
- * @param N N-positions down the alphabet for the encryption of a character
- * @return uint8_t* Encrypted message (ciphertext)
+ * @param plaintext     Message to be encrypted
+ * @param N             N-positions down the alphabet for the encryption of a character
+ * @return uint8_t*     Encrypted message (ciphertext)
  */
 uint8_t* caesar_encrypt(uint8_t* plaintext, uint16_t N);
 
 /**
  * @brief Caesar's cipher decryption
  * 
- * @param ciphertext Message to be decrypted
- * @param N N-positions down the alphabet for the encryption of a character
- * @return uint8_t* Decrypted message (plaintext)
+ * @param ciphertext    Message to be decrypted
+ * @param N             N-positions down the alphabet for the encryption of a character
+ * @return uint8_t*     Decrypted message (plaintext)
  */
 uint8_t* caesar_decrypt(uint8_t* ciphertext, uint16_t N);
 
 /**
  * @brief Playfair cipher encryption
  * 
- * @param plaintext Message to be encrypted
- * @param key 5x5 matrix key for encryption-decryption
- * @return unsigned* Encrypted message (ciphertext)
+ * @param plaintext     Message to be encrypted
+ * @param key           5x5 matrix key for encryption-decryption
+ * @return unsigned*    Encrypted message (ciphertext)
  */
 unsigned char* playfair_encrypt(unsigned char* plaintext, unsigned char** key);
 
 /**
  * @brief Playfair cipher decryption
  * 
- * @param ciphertext Message to be decrypted
- * @param key 5x5 matrix key for encryption-decryption
- * @return unsigned* Decrypted message (plaintext)
+ * @param ciphertext    Message to be decrypted
+ * @param key           5x5 matrix key for encryption-decryption
+ * @return unsigned*    Decrypted message (plaintext)
  */
 unsigned char* playfair_decrypt(unsigned char* ciphertext, unsigned char** key);
 
 /**
  * @brief Creates and returns a 5x5 matrix key
  * 
- * @param key Key for encryption-decryption
- * @return unsigned**  5x5 matrix key
+ * @param key           Key for encryption-decryption
+ * @return unsigned**   5x5 matrix key
  */
 unsigned char** playfair_keymatrix(unsigned char* key);
 
 /**
+ * @brief Get the position of letter on Keymatrix object
+ * 
+ * @param keymatrix 5x5 matrix key
+ * @param letter    Character of plaintext/ciphertext
+ * @param row       The row of the letter on the keymatrix
+ * @param column    The column of the letter on the keymatrix
+ */
+void getPositionOnKeymatrix(unsigned char **keymatrix, unsigned char letter, size_t *row, size_t *column);
+
+/**
  * @brief Affine cipher encryption
  * 
- * @param plaintext Message to be encrypted
- * @return uint8_t* Encrypted message (ciphertext)
+ * @param plaintext     Message to be encrypted
+ * @return uint8_t*     Encrypted message (ciphertext)
  */
 /* uint8_t * affine_encrypt(uint8_t* plaintext); */
 
 /**
  * @brief Affine cipher decryption
  * 
- * @param ciphertext Message to be decrypted
- * @return uint8_t* Decrypted message (plaintext)
+ * @param ciphertext    Message to be decrypted
+ * @return uint8_t*     Decrypted message (plaintext)
  */
 /* uint8_t * affine_decrypt(uint8_t* ciphertext); */
 
 /**
  * @brief Feistel cipher encryption
  * 
- * @param plaintext Message to be encrypted
- * @param keys Array of keys for encryption-decryption
- * @return uint8_t* Encrypted message (ciphertext)
+ * @param plaintext     Message to be encrypted
+ * @param keys          Array of keys for encryption-decryption
+ * @return uint8_t*     Encrypted message (ciphertext)
  */
 /* uint8_t* feistel_encrypt(uint8_t* plaintext, uint8_t keys[]); */
 
 /**
  * @brief Feistel cipher decryption
  * 
- * @param ciphertext Message to be decrypted
- * @param keys Array of keys for encryption-decryption
- * @return uint8_t* Decrypted message (plaintext)
+ * @param ciphertext    Message to be decrypted
+ * @param keys          Array of keys for encryption-decryption
+ * @return uint8_t*     Decrypted message (plaintext)
  */
 /* uint8_t* feistel_decrypt(uint8_t* ciphertext, uint8_t keys[]); */
 
@@ -156,8 +188,8 @@ unsigned char** playfair_keymatrix(unsigned char* key);
  * encrypted and its output is XORed with the other half of
  * the data.
  * 
- * @param block Block of data to be encrypted/decrypted
- * @param key Key for encryption-decryption
+ * @param block     Block of data to be encrypted/decrypted
+ * @param key       Key for encryption-decryption
  * @return uint8_t* Encrypted/Decrypted message (ciphertext/plaintext)
  */
 /* uint8_t* round(uint8_t* block, uint8_t* key); */

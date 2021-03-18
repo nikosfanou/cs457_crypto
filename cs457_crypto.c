@@ -162,10 +162,10 @@ unsigned char **playfair_keymatrix(unsigned char *key)
     printf("Key of keymatrix: %s\n", key);
 
     /* Key matrix is 5x5 */
-    key_matrix = (unsigned char **)malloc(5 * sizeof(unsigned char *));
-    for (counter = 0; counter < 5; counter++)
+    key_matrix = (unsigned char **)malloc(KEYMATRIX_ROWS * sizeof(unsigned char *));
+    for (counter = 0; counter < KEYMATRIX_ROWS; counter++)
     {
-        *(key_matrix + counter) = (unsigned char *)malloc(5 * sizeof(unsigned char));
+        *(key_matrix + counter) = (unsigned char *)malloc(KEYMATRIX_COLUMNS * sizeof(unsigned char));
     }
 
     for (counter = 0; counter < length; counter++)
@@ -177,7 +177,7 @@ unsigned char **playfair_keymatrix(unsigned char *key)
         {
             if (!alphabet_table[*(key + counter) - UPPERCASE_START])
             {
-                key_matrix[matrix_char / 5][matrix_char % 5] = *(key + counter);
+                key_matrix[matrix_char / KEYMATRIX_ROWS][matrix_char % KEYMATRIX_COLUMNS] = *(key + counter);
                 matrix_char++;
                 alphabet_table[*(key + counter) - UPPERCASE_START] = 1;
                 if (*(key + counter) == 73) /* 73 is I code on Ascii table */
@@ -188,7 +188,7 @@ unsigned char **playfair_keymatrix(unsigned char *key)
         {
             if (!alphabet_table[*(key + counter) - UPPERCASE_START])
             {
-                key_matrix[matrix_char / 5][matrix_char % 5] = *(key + counter) - 1;
+                key_matrix[matrix_char / KEYMATRIX_ROWS][matrix_char % KEYMATRIX_COLUMNS] = *(key + counter) - 1;
                 matrix_char++;
                 alphabet_table[*(key + counter) - 1 - UPPERCASE_START] = 1;
                 alphabet_table[*(key + counter) - UPPERCASE_START] = 1;
@@ -200,7 +200,7 @@ unsigned char **playfair_keymatrix(unsigned char *key)
     {
         if (!alphabet_table[counter])
         {
-            key_matrix[matrix_char / 5][matrix_char % 5] = UPPERCASE_START + counter;
+            key_matrix[matrix_char / KEYMATRIX_ROWS][matrix_char % KEYMATRIX_COLUMNS] = UPPERCASE_START + counter;
             if (counter == 8) /* I is the 9th letter in the alphabet. */
                 alphabet_table[counter + 1] = 1;
             matrix_char++;
@@ -218,7 +218,7 @@ unsigned char **playfair_keymatrix(unsigned char *key)
 
 unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
 {
-    size_t length, counter, ciphertext_size;
+    size_t length, counter, ciphertext_size, columnOfFirst, columnOfSecond, rowOfFirst, rowOfSecond ;
     unsigned char *ciphertext;
 
     assert(plaintext);
@@ -249,12 +249,57 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
             *(ciphertext + counter + 1) = 'X';
         }
     }
+    ciphertext_size = ciphertext_size + isOdd(ciphertext_size);
+
+    for (counter = 0; counter < ciphertext_size; counter = counter + 2)
+    {
+        if(*(ciphertext + counter) == 'J'){
+            *(ciphertext + counter) = 'I';
+        }
+        if(*(ciphertext + counter + 1) == 'J'){
+            *(ciphertext + counter) = 'I';
+        }
+
+        getPositionOnKeymatrix(key, *(ciphertext + counter), &rowOfFirst, &columnOfFirst);
+        getPositionOnKeymatrix(key, *(ciphertext + counter + 1), &rowOfSecond, &columnOfSecond);
+        if (!sameKeyMatrixRow(rowOfFirst, rowOfSecond) && !sameKeyMatrixColumn(columnOfFirst, columnOfSecond))
+        {
+            *(ciphertext + counter) = key[rowOfFirst][columnOfSecond];
+            *(ciphertext + counter + 1) = key[rowOfSecond][columnOfFirst];
+        }
+        if ( sameKeyMatrixRow(rowOfFirst, rowOfSecond) )
+        {
+            *(ciphertext + counter) = key[rowOfFirst][ (columnOfFirst + 1) % KEYMATRIX_COLUMNS];
+            *(ciphertext + counter + 1) = key[rowOfSecond][ (columnOfSecond + 1) % KEYMATRIX_COLUMNS];
+        }
+        if ( sameKeyMatrixColumn(columnOfFirst, columnOfSecond) )
+        {
+            *(ciphertext + counter) = key[ (rowOfFirst + 1) % KEYMATRIX_ROWS][columnOfFirst];
+            *(ciphertext + counter + 1) = key[ (rowOfSecond + 1) % KEYMATRIX_ROWS][columnOfSecond];
+        }
+    }
 
     /* An einai monos arithmos vazoume ena X sto telos kai meta to terminal */
-    *(ciphertext + ciphertext_size + isOdd(ciphertext_size)) = '\0';
+    *(ciphertext + ciphertext_size) = '\0';
     return ciphertext;
 }
 
 unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
 {
+}
+
+void getPositionOnKeymatrix(unsigned char **keymatrix, unsigned char letter, size_t *row, size_t *column)
+{
+    size_t counter;
+
+    for (counter = 0; counter < KEYMATRIX_SIZE; counter++)
+    {
+        if (letter == keymatrix[counter / KEYMATRIX_ROWS][counter % KEYMATRIX_COLUMNS])
+        {
+            *row = counter / KEYMATRIX_ROWS;
+            *column = counter % KEYMATRIX_COLUMNS;
+            return;
+        }
+    }
+    return;
 }
