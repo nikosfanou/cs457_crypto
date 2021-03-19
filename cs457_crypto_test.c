@@ -240,7 +240,6 @@ int main(int argc, char *argv[])
         ciphertext = playfair_encrypt(plaintext, key_matrix);
         fprintf(output, "Ciphertext:\n%s\n", ciphertext);
         fprintf(output, "Ciphertext len: %lu\n\n", strlen((char *)ciphertext));
-
         result = playfair_decrypt(ciphertext, key_matrix);
         for (counter = 0; counter < 5; counter++)
         {

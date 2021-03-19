@@ -6,10 +6,28 @@
  */
 
 #include "cs457_crypto.h"
+#include "queue.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+
+/**
+ * @brief   Global variable to store where X is a second character in a
+ *          pair of characters in playfair cipher.
+ * 
+ */
+queue_t *Xqueue;
+
+/**
+ * @brief   Stores if the plaintext size is odd number.
+ *          Used to know if the last X of the ciphertext is there because of
+ *          a double character or not.
+ *          If 0, its a double character.
+ *          If 1, its not.
+ * 
+ */
+int message_odd;
 
 uint8_t *otp_encrypt(uint8_t *plaintext, uint8_t *key)
 {
@@ -235,6 +253,7 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
     assert(key);
     length = strlen((char *)plaintext);
     ciphertext_size = 0;
+    Xqueue = queue_init();
 
     if (isOdd(length))
         ciphertext = malloc(sizeof(unsigned char) * (length + 2));
@@ -252,14 +271,18 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
 
     for (counter = 0; counter < ciphertext_size; counter = counter + 2)
     {
+        /* kanw ton prwto elegxo gia na kanw asfalh elegxo tou deyterou */
+        if ((counter != ciphertext_size - 1) && (*(ciphertext + counter + 1) == 'X'))
+            enqueue(Xqueue, counter + 1);
+
         /*  counter panta zygos ara an mpei sthn epomenh if logw tou prwtou
-            to ciphertext_size einai monos arithmos kai ftasame sth teleytaia dyada. */
+            to ciphertext_size einai monos arithmos kai ftasame sth teleytaia dyada (monada mexri twra). */
         if ((counter == ciphertext_size - 1) || (*(ciphertext + counter) == *(ciphertext + counter + 1)))
         {
             *(ciphertext + counter + 1) = 'X';
-            /* tha xrhsimopoihthei stack gia to X */
         }
     }
+    message_odd = isOdd(ciphertext_size);
     ciphertext_size = ciphertext_size + isOdd(ciphertext_size);
 
     for (counter = 0; counter < ciphertext_size; counter = counter + 2)
@@ -331,15 +354,24 @@ unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
 
     for (counter = 0; counter < length; counter = counter + 2)
     {
+        /* An kapoios xarakthras htan ontws X mpainei edw */
+        if (!queue_is_empty(Xqueue) && queue_peek(Xqueue) == counter + 1)
+        {
+            printf("Xqueue size: %u\n", Xqueue->size);
+            dequeue(Xqueue);
+            continue;
+        }
+
         if (*(plaintext + counter + 1) == 'X')
         {
-            *(plaintext + counter + 1) = *(plaintext + counter);
-            if(counter == length - 2)
+            if ((counter == length - 2) && message_odd)
                 *(plaintext + counter + 1) = '\0';
+            else
+                *(plaintext + counter + 1) = *(plaintext + counter);
         }
-        /* tha xrhsimopoihthei stack gia to X , oti antikathistw me x tha mpainei sto stack*/
     }
-
+    queue_free(Xqueue);
+    Xqueue = NULL;
     *(plaintext + length) = '\0';
     return plaintext;
 }

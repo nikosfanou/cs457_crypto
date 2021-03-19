@@ -2,8 +2,10 @@
 
 CC = gcc
 
-LIB = cs457_crypto.h
-LIB_IMP = cs457_crypto.c
+CRYPTO_LIB = cs457_crypto.h
+CRYPTO_IMP = cs457_crypto.c
+QUEUE_LIB = queue.h
+QUEUE_IMP = queue.c
 TEST_FILE = cs457_crypto_test.c
 
 GCC_FLAGS = -pedantic -o
@@ -36,8 +38,8 @@ affine: all
 feistel: all
 	./$(EXEC_FILE) $(FEISTEL_FLAG)
 
-all: $(LIB) $(LIB_IMP) $(TEST_FILE)
-	$(CC) $(LIB_IMP) $(TEST_FILE) $(GCC_FLAGS) $(EXEC_FILE)
+all: $(CRYPTO_LIB) $(CRYPTO_IMP) $(TEST_FILE) $(QUEUE_LIB) $(QUEUE_IMP)
+	$(CC) $(CRYPTO_IMP) $(TEST_FILE) $(QUEUE_IMP) $(GCC_FLAGS) $(EXEC_FILE)
 
 clean:
 	rm -f $(EXEC_FILE)
