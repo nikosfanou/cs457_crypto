@@ -236,12 +236,12 @@ int main(int argc, char *argv[])
         printf("You chose playfair cipher algorithm for your encryption.\n");
         key_matrix = playfair_keymatrix((unsigned char*)"HELLO WORLD");
         print_keymatrix(key_matrix);
+
         ciphertext = playfair_encrypt(plaintext, key_matrix);
         fprintf(output, "Ciphertext:\n%s\n", ciphertext);
         fprintf(output, "Ciphertext len: %lu\n\n", strlen((char *)ciphertext));
-        /*
-            decrypt
-        */
+
+        result = playfair_decrypt(ciphertext, key_matrix);
         for (counter = 0; counter < 5; counter++)
         {
             free(*(key_matrix + counter));
@@ -249,11 +249,11 @@ int main(int argc, char *argv[])
        free(key_matrix);
     }
 
-    /*fprintf(output, "Message:\n%s\n", result);
-    fprintf(output, "Result len: %lu\n", strlen((char *)result));*/
+    fprintf(output, "Message:\n%s\n", result);
+    fprintf(output, "Result len: %lu\n", strlen((char *)result));
     free(plaintext);
     free(ciphertext);
-    /*free(result);*/
+    free(result);
     fclose(output);
     fclose(input);
     return 0;

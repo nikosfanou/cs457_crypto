@@ -210,15 +210,25 @@ unsigned char **playfair_keymatrix(unsigned char *key)
     return key_matrix;
 }
 
-/*
-    Ara se oles tis dyades antikathistoyme to X me ton aristero char ektos th teleytaia fora
-    kai mono an exoyme length mono arithmo.
-    Gia ta alla akolouthoume tous kanones tou pinaka
-*/
+void getPositionOnKeymatrix(unsigned char **keymatrix, unsigned char letter, size_t *row, size_t *column)
+{
+    size_t counter;
+
+    for (counter = 0; counter < KEYMATRIX_SIZE; counter++)
+    {
+        if (letter == keymatrix[counter / KEYMATRIX_ROWS][counter % KEYMATRIX_COLUMNS])
+        {
+            *row = counter / KEYMATRIX_ROWS;
+            *column = counter % KEYMATRIX_COLUMNS;
+            return;
+        }
+    }
+    return;
+}
 
 unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
 {
-    size_t length, counter, ciphertext_size, columnOfFirst, columnOfSecond, rowOfFirst, rowOfSecond ;
+    size_t length, counter, ciphertext_size, columnOfFirst, columnOfSecond, rowOfFirst, rowOfSecond;
     unsigned char *ciphertext;
 
     assert(plaintext);
@@ -247,17 +257,21 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
         if ((counter == ciphertext_size - 1) || (*(ciphertext + counter) == *(ciphertext + counter + 1)))
         {
             *(ciphertext + counter + 1) = 'X';
+            /* tha xrhsimopoihthei stack gia to X */
         }
     }
     ciphertext_size = ciphertext_size + isOdd(ciphertext_size);
 
     for (counter = 0; counter < ciphertext_size; counter = counter + 2)
     {
-        if(*(ciphertext + counter) == 'J'){
+        if (*(ciphertext + counter) == 'J')
+        {
             *(ciphertext + counter) = 'I';
+            /*isws xrhsimopoihthei stack */
         }
-        if(*(ciphertext + counter + 1) == 'J'){
-            *(ciphertext + counter) = 'I';
+        if (*(ciphertext + counter + 1) == 'J')
+        {
+            *(ciphertext + counter + 1) = 'I';
         }
 
         getPositionOnKeymatrix(key, *(ciphertext + counter), &rowOfFirst, &columnOfFirst);
@@ -267,15 +281,15 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
             *(ciphertext + counter) = key[rowOfFirst][columnOfSecond];
             *(ciphertext + counter + 1) = key[rowOfSecond][columnOfFirst];
         }
-        if ( sameKeyMatrixRow(rowOfFirst, rowOfSecond) )
+        if (sameKeyMatrixRow(rowOfFirst, rowOfSecond))
         {
-            *(ciphertext + counter) = key[rowOfFirst][ (columnOfFirst + 1) % KEYMATRIX_COLUMNS];
-            *(ciphertext + counter + 1) = key[rowOfSecond][ (columnOfSecond + 1) % KEYMATRIX_COLUMNS];
+            *(ciphertext + counter) = key[rowOfFirst][(columnOfFirst + 1) % KEYMATRIX_COLUMNS];
+            *(ciphertext + counter + 1) = key[rowOfSecond][(columnOfSecond + 1) % KEYMATRIX_COLUMNS];
         }
-        if ( sameKeyMatrixColumn(columnOfFirst, columnOfSecond) )
+        if (sameKeyMatrixColumn(columnOfFirst, columnOfSecond))
         {
-            *(ciphertext + counter) = key[ (rowOfFirst + 1) % KEYMATRIX_ROWS][columnOfFirst];
-            *(ciphertext + counter + 1) = key[ (rowOfSecond + 1) % KEYMATRIX_ROWS][columnOfSecond];
+            *(ciphertext + counter) = key[(rowOfFirst + 1) % KEYMATRIX_ROWS][columnOfFirst];
+            *(ciphertext + counter + 1) = key[(rowOfSecond + 1) % KEYMATRIX_ROWS][columnOfSecond];
         }
     }
 
@@ -286,20 +300,46 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
 
 unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
 {
-}
+    size_t length, counter, columnOfFirst, columnOfSecond, rowOfFirst, rowOfSecond;
+    unsigned char *plaintext;
 
-void getPositionOnKeymatrix(unsigned char **keymatrix, unsigned char letter, size_t *row, size_t *column)
-{
-    size_t counter;
+    assert(ciphertext);
+    assert(key);
+    length = strlen((char *)ciphertext);
 
-    for (counter = 0; counter < KEYMATRIX_SIZE; counter++)
+    plaintext = malloc(sizeof(unsigned char) * (length + 1));
+    for (counter = 0; counter < length; counter = counter + 2)
     {
-        if (letter == keymatrix[counter / KEYMATRIX_ROWS][counter % KEYMATRIX_COLUMNS])
+        getPositionOnKeymatrix(key, *(ciphertext + counter), &rowOfFirst, &columnOfFirst);
+        getPositionOnKeymatrix(key, *(ciphertext + counter + 1), &rowOfSecond, &columnOfSecond);
+        if (!sameKeyMatrixRow(rowOfFirst, rowOfSecond) && !sameKeyMatrixColumn(columnOfFirst, columnOfSecond))
         {
-            *row = counter / KEYMATRIX_ROWS;
-            *column = counter % KEYMATRIX_COLUMNS;
-            return;
+            *(plaintext + counter) = key[rowOfFirst][columnOfSecond];
+            *(plaintext + counter + 1) = key[rowOfSecond][columnOfFirst];
+        }
+        if (sameKeyMatrixRow(rowOfFirst, rowOfSecond))
+        {
+            *(plaintext + counter) = key[rowOfFirst][(columnOfFirst - 1 + KEYMATRIX_COLUMNS) % KEYMATRIX_COLUMNS];
+            *(plaintext + counter + 1) = key[rowOfSecond][(columnOfSecond - 1 + KEYMATRIX_COLUMNS) % KEYMATRIX_COLUMNS];
+        }
+        if (sameKeyMatrixColumn(columnOfFirst, columnOfSecond))
+        {
+            *(plaintext + counter) = key[(rowOfFirst - 1 + KEYMATRIX_ROWS) % KEYMATRIX_ROWS][columnOfFirst];
+            *(plaintext + counter + 1) = key[(rowOfSecond - 1 + KEYMATRIX_ROWS) % KEYMATRIX_ROWS][columnOfSecond];
         }
     }
-    return;
+
+    for (counter = 0; counter < length; counter = counter + 2)
+    {
+        if (*(plaintext + counter + 1) == 'X')
+        {
+            *(plaintext + counter + 1) = *(plaintext + counter);
+            if(counter == length - 2)
+                *(plaintext + counter + 1) = '\0';
+        }
+        /* tha xrhsimopoihthei stack gia to X , oti antikathistw me x tha mpainei sto stack*/
+    }
+
+    *(plaintext + length) = '\0';
+    return plaintext;
 }

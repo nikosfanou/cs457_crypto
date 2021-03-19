@@ -140,7 +140,8 @@ unsigned char* playfair_decrypt(unsigned char* ciphertext, unsigned char** key);
 unsigned char** playfair_keymatrix(unsigned char* key);
 
 /**
- * @brief Get the position of letter on Keymatrix object
+ * @brief   Gets the position of letter on Keymatrix object 
+ *          and stores it at row,column parameters
  * 
  * @param keymatrix 5x5 matrix key
  * @param letter    Character of plaintext/ciphertext
