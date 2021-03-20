@@ -10,28 +10,43 @@
 #include <stdint.h>
 #include <unistd.h>
 
-/* N in the range of 0 to 65,535 */
-#define NUM 12
+/*  N in the range of 0 to 65,535 
+    KEY for caesar's cryptography*/
+#define NUM 94
 #define INIT_INPUT_SIZE 128
 
-#define DIGIT_START 48 /* Start of digits in ascii table */
-#define DIGIT_END 57   /* End of digits in ascii table */
+/* Start of digits in ascii table */
+#define DIGIT_START 48
+/* End of digits in ascii table */
+#define DIGIT_END 57
 #define UPPERCASE_START 65
 #define LOWERCASE_START 97
 #define UPPERCASE_END 90
 #define LOWERCASE_END 122
 #define NUM_OF_DIGITS 10
 #define NUM_OF_LETTERS 26
+
 #define KEYMATRIX_SIZE 25
 #define KEYMATRIX_ROWS 5
 #define KEYMATRIX_COLUMNS 5
+
+/* h apostash metaksy kefalaiwn kai mikrwn xarakthrwn ston pinaka ASCII */
+#define UPPER_LOWER_DISTANCE 32
+/*  f(x) = (A * X + B) mod M
+    A is a constant
+    B is the magnitude of the shift
+    X is the letter to encrypt
+    M the number of letters
+*/
+#define A 11
+#define B 19
+#define M 26
 
 #define ONE_TIME_PAD 1
 #define CAESAR_CIPHER 2
 #define PLAYFAIR_CIPHER 3
 #define AFFINE_CIPHER 4
 #define FEISTEL_CIPHER 5
-
 
 /**
  * @brief Checks if character is uppercase letter.
@@ -75,7 +90,6 @@
 #define sameKeyMatrixColumn(column1, column2) \
     (column1 == column2)
 
-
 /**
  * @brief One-time pad encryption
  * 
@@ -83,7 +97,7 @@
  * @param key Key for   encryption-decryption
  * @return uint8_t*     Encrypted message (ciphertext)
  */
-uint8_t* otp_encrypt(uint8_t* plaintext, uint8_t* key);
+uint8_t *otp_encrypt(uint8_t *plaintext, uint8_t *key);
 
 /**
  * @brief One-time pad decryption
@@ -92,7 +106,7 @@ uint8_t* otp_encrypt(uint8_t* plaintext, uint8_t* key);
  * @param key Key for   encryption-decryption
  * @return uint8_t*     Decrypted message (plaintext)
  */
-uint8_t* otp_decrypt(uint8_t* ciphertext, uint8_t * key);
+uint8_t *otp_decrypt(uint8_t *ciphertext, uint8_t *key);
 
 /**
  * @brief Caesar's cipher encryption
@@ -101,7 +115,7 @@ uint8_t* otp_decrypt(uint8_t* ciphertext, uint8_t * key);
  * @param N             N-positions down the alphabet for the encryption of a character
  * @return uint8_t*     Encrypted message (ciphertext)
  */
-uint8_t* caesar_encrypt(uint8_t* plaintext, uint16_t N);
+uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N);
 
 /**
  * @brief Caesar's cipher decryption
@@ -110,7 +124,7 @@ uint8_t* caesar_encrypt(uint8_t* plaintext, uint16_t N);
  * @param N             N-positions down the alphabet for the encryption of a character
  * @return uint8_t*     Decrypted message (plaintext)
  */
-uint8_t* caesar_decrypt(uint8_t* ciphertext, uint16_t N);
+uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N);
 
 /**
  * @brief Playfair cipher encryption
@@ -119,7 +133,7 @@ uint8_t* caesar_decrypt(uint8_t* ciphertext, uint16_t N);
  * @param key           5x5 matrix key for encryption-decryption
  * @return unsigned*    Encrypted message (ciphertext)
  */
-unsigned char* playfair_encrypt(unsigned char* plaintext, unsigned char** key);
+unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key);
 
 /**
  * @brief Playfair cipher decryption
@@ -128,7 +142,7 @@ unsigned char* playfair_encrypt(unsigned char* plaintext, unsigned char** key);
  * @param key           5x5 matrix key for encryption-decryption
  * @return unsigned*    Decrypted message (plaintext)
  */
-unsigned char* playfair_decrypt(unsigned char* ciphertext, unsigned char** key);
+unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key);
 
 /**
  * @brief Creates and returns a 5x5 matrix key
@@ -136,7 +150,7 @@ unsigned char* playfair_decrypt(unsigned char* ciphertext, unsigned char** key);
  * @param key           Key for encryption-decryption
  * @return unsigned**   5x5 matrix key
  */
-unsigned char** playfair_keymatrix(unsigned char* key);
+unsigned char **playfair_keymatrix(unsigned char *key);
 
 /**
  * @brief   Gets the position of letter on Keymatrix object 
@@ -155,7 +169,7 @@ void getPositionOnKeymatrix(unsigned char **keymatrix, unsigned char letter, siz
  * @param plaintext     Message to be encrypted
  * @return uint8_t*     Encrypted message (ciphertext)
  */
-/* uint8_t * affine_encrypt(uint8_t* plaintext); */
+uint8_t *affine_encrypt(uint8_t *plaintext);
 
 /**
  * @brief Affine cipher decryption
@@ -163,7 +177,17 @@ void getPositionOnKeymatrix(unsigned char **keymatrix, unsigned char letter, siz
  * @param ciphertext    Message to be decrypted
  * @return uint8_t*     Decrypted message (plaintext)
  */
-/* uint8_t * affine_decrypt(uint8_t* ciphertext); */
+uint8_t * affine_decrypt(uint8_t* ciphertext);
+
+/**
+ * @brief   Function taken from geeks for geeks
+ *          Given two integers ‘a’ and ‘m’, finds modular multiplicative inverse of ‘a’ under modulo ‘m’.
+ * 
+ * @param a The integer a
+ * @param m The integer m
+ * @return int Returns modular multiplicative inverse of ‘a’ under modulo ‘m’.
+ */
+int modInverse(int a, int m);
 
 /**
  * @brief Feistel cipher encryption

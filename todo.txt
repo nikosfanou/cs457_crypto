@@ -1,5 +1,5 @@
 1) Na diorthwsw pithanws sxolia.
 2) Sto feistel theloun na kryptografountai ola ? --> erwthsh
 3) Na prosthesw elegxous gia fail malloc
-4) Meleth affine algorithm
+4) Na ksanadw affine decrypt
 5) Organwsh se fakelous isws

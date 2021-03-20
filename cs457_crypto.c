@@ -402,3 +402,65 @@ unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
     return plaintext;
 }
 
+uint8_t *affine_encrypt(uint8_t *plaintext)
+{
+    size_t counter, length, ciphertext_size;
+    uint8_t *ciphertext;
+
+    length = strlen((char *)plaintext);
+    ciphertext = malloc(sizeof(uint8_t) * (length + 1));
+    ciphertext_size = 0;
+    for (counter = 0; counter < length; counter++)
+    {
+        /* kratame mono ta kefalaia kai ta mikra ta kanoume kefalaia */
+        if (!isUppercaseLetter(*(plaintext + counter)))
+        {
+            if (isLowercaseLetter(*(plaintext + counter)))
+            {
+                //convert to upper
+                *(ciphertext + ciphertext_size) = *(plaintext + counter) - UPPER_LOWER_DISTANCE;
+                ciphertext_size++;
+            }
+            continue;
+        }
+
+        *(ciphertext + ciphertext_size) = *(plaintext + counter);
+        ciphertext_size++;
+    }
+
+    for (counter = 0; counter < ciphertext_size; counter++)
+    {
+        /* f(x) = (A * X + B) mod M */
+        *(ciphertext + counter) = ((A * (*(ciphertext + counter) - UPPERCASE_START) + B) % M) + UPPERCASE_START;
+    }
+
+    *(ciphertext + ciphertext_size) = '\0';
+    return ciphertext;
+}
+
+uint8_t *affine_decrypt(uint8_t *ciphertext)
+{
+    uint8_t *plaintext;
+    size_t counter, length;
+
+    length = strlen((char *)ciphertext);
+    plaintext = malloc(sizeof(uint8_t) * (length + 1));
+    /*  D(x) = A^-1 * (X - B) mod M 
+        A^-1 is the modular multiplicative inverse of A mod M*/
+    for (counter = 0; counter < length; counter++)
+    {
+        *(plaintext + counter) = ((modInverse(A, M) * ((*(ciphertext + counter) + UPPERCASE_START) - B)) % M) + UPPERCASE_START;
+    }
+
+    *(plaintext + length) = '\0';
+    return plaintext;
+}
+
+
+int modInverse(int a, int m)
+{
+    int x;
+    for (x = 1; x < m; x++)
+        if (((a % m) * (x % m)) % m == 1)
+            return x;
+}

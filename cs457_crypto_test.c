@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
 
     output = stdout;
     input = stdin;
-    algorithm = CAESAR_CIPHER;
+    algorithm = AFFINE_CIPHER;
     while ((opt = getopt(argc, argv, "i:o:1cpafh")) != -1)
     {
         switch (opt)
@@ -246,6 +246,12 @@ int main(int argc, char *argv[])
             free(*(key_matrix + counter));
         }
        free(key_matrix);
+    }else if(algorithm == AFFINE_CIPHER){
+        printf("You chose affine cipher algorithm for your encryption.\n");
+        ciphertext = affine_encrypt(plaintext);
+        fprintf(output, "Ciphertext:\n%s\n", ciphertext);
+        fprintf(output, "Ciphertext len: %lu\n\n", strlen((char *)ciphertext));
+        result = affine_decrypt(ciphertext);
     }
 
     fprintf(output, "Message:\n%s\n", result);
