@@ -13,7 +13,6 @@
 /* N in the range of 0 to 65,535 */
 #define NUM 12
 #define INIT_INPUT_SIZE 128
-/* #define ushort unsigned short/uint16_t */
 
 #define DIGIT_START 48 /* Start of digits in ascii table */
 #define DIGIT_END 57   /* End of digits in ascii table */

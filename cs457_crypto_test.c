@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
 
     output = stdout;
     input = stdin;
-    algorithm = PLAYFAIR_CIPHER;
+    algorithm = CAESAR_CIPHER;
     while ((opt = getopt(argc, argv, "i:o:1cpafh")) != -1)
     {
         switch (opt)

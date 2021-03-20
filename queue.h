@@ -1,7 +1,7 @@
 /**
  * @file queue.h
  * @author Nikos Fanourakis (4237)
- * @brief A queue library used for the correct cryptography of X characters
+ * @brief A queue library used for the correct cryptography of X and J characters
  * 
  */
 

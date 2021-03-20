@@ -17,7 +17,13 @@
  *          pair of characters in playfair cipher.
  * 
  */
-queue_t *Xqueue;
+queue_t *Xqueue = NULL;
+
+/**
+ * @brief   Global variable to store where J exists in the plaintext.
+ * 
+ */
+queue_t *Jqueue = NULL;
 
 /**
  * @brief   Stores if the plaintext size is odd number.
@@ -27,7 +33,7 @@ queue_t *Xqueue;
  *          If 1, its not.
  * 
  */
-int message_odd;
+int message_odd = 0;
 
 uint8_t *otp_encrypt(uint8_t *plaintext, uint8_t *key)
 {
@@ -254,6 +260,7 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
     length = strlen((char *)plaintext);
     ciphertext_size = 0;
     Xqueue = queue_init();
+    Jqueue = queue_init();
 
     if (isOdd(length))
         ciphertext = malloc(sizeof(unsigned char) * (length + 2));
@@ -290,11 +297,12 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
         if (*(ciphertext + counter) == 'J')
         {
             *(ciphertext + counter) = 'I';
-            /*isws xrhsimopoihthei stack */
+            enqueue(Jqueue, counter);
         }
         if (*(ciphertext + counter + 1) == 'J')
         {
             *(ciphertext + counter + 1) = 'I';
+            enqueue(Jqueue, counter + 1);
         }
 
         getPositionOnKeymatrix(key, *(ciphertext + counter), &rowOfFirst, &columnOfFirst);
@@ -354,6 +362,22 @@ unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
 
     for (counter = 0; counter < length; counter = counter + 2)
     {
+        /* elegxoi gia J */
+        if (!queue_is_empty(Jqueue) && queue_peek(Jqueue) == counter)
+        {
+            printf("Jqueue sizeA: %u\n", Jqueue->size);
+            dequeue(Jqueue);
+            *(plaintext + counter) = 'J';
+        }
+
+        if (!queue_is_empty(Jqueue) && queue_peek(Jqueue) == counter + 1)
+        {
+            printf("Jqueue sizeB: %u\n", Jqueue->size);
+            dequeue(Jqueue);
+            *(plaintext + counter + 1) = 'J';
+            continue;
+        }
+
         /* An kapoios xarakthras htan ontws X mpainei edw */
         if (!queue_is_empty(Xqueue) && queue_peek(Xqueue) == counter + 1)
         {
@@ -371,7 +395,10 @@ unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
         }
     }
     queue_free(Xqueue);
+    queue_free(Jqueue);
     Xqueue = NULL;
+    Jqueue = NULL;
     *(plaintext + length) = '\0';
     return plaintext;
 }
+
