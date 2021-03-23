@@ -3,3 +3,5 @@
 3) Na prosthesw elegxous gia fail malloc
 4) Na ksanadw affine decrypt
 5) Organwsh se fakelous isws
+6) Na allaksw to caesar cipher wste na kanei wrap around otan teleiwnei olo to character set
+(dhladh meta to 9 paei A ktlp)
