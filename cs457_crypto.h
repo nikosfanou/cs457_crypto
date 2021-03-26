@@ -12,7 +12,7 @@
 
 /*  N in the range of 0 to 65,535 
     KEY for caesar's cryptography*/
-#define NUM 94
+#define NUM 1
 #define INIT_INPUT_SIZE 128
 
 /* Start of digits in ascii table */
@@ -30,7 +30,8 @@
 #define KEYMATRIX_ROWS 5
 #define KEYMATRIX_COLUMNS 5
 
-/* h apostash metaksy kefalaiwn kai mikrwn xarakthrwn ston pinaka ASCII */
+/*  h apostash metaksy kefalaiwn kai mikrwn xarakthrwn ston pinaka ASCII 
+    Xrhsimevei sthn antikatastash twn mikrwn xarakthrwn se megala. */
 #define UPPER_LOWER_DISTANCE 32
 /*  f(x) = (A * X + B) mod M
     A is a constant

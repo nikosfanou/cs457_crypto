@@ -93,23 +93,41 @@ uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N)
     while (count < len)
     {
         character = *(plaintext + count);
+        *(ciphertext + count) = character + (N % (NUM_OF_DIGITS + NUM_OF_LETTERS * 2));
         if (isDigit(character))
         {
-            *(ciphertext + count) = character + (N % NUM_OF_DIGITS);
             if (*(ciphertext + count) > DIGIT_END)
-                *(ciphertext + count) = (*(ciphertext + count) % (DIGIT_END + 1)) + DIGIT_START;
+                *(ciphertext + count) = *(ciphertext + count) + (UPPERCASE_START - DIGIT_END - 1);
+
+            if (*(ciphertext + count) > UPPERCASE_END)
+                *(ciphertext + count) = *(ciphertext + count) + (LOWERCASE_START - UPPERCASE_END - 1);
+
+            if (*(ciphertext + count) > LOWERCASE_END)
+                *(ciphertext + count) = (*(ciphertext + count) % (LOWERCASE_END + 1)) + DIGIT_START; /* WRAP AROUND */
         }
         else if (isUppercaseLetter(character))
         {
-            *(ciphertext + count) = character + (N % NUM_OF_LETTERS);
             if (*(ciphertext + count) > UPPERCASE_END)
-                *(ciphertext + count) = (*(ciphertext + count) % (UPPERCASE_END + 1)) + UPPERCASE_START;
+                *(ciphertext + count) = *(ciphertext + count) + (LOWERCASE_START - UPPERCASE_END - 1);
+
+            if (*(ciphertext + count) > LOWERCASE_END)
+            {
+                *(ciphertext + count) = (*(ciphertext + count) % (LOWERCASE_END + 1)) + DIGIT_START; /* WRAP AROUND */
+                if (*(ciphertext + count) > DIGIT_END)
+                    *(ciphertext + count) = *(ciphertext + count) + (UPPERCASE_START - DIGIT_END - 1);
+            }
         }
         else if (isLowercaseLetter(character))
         {
-            *(ciphertext + count) = character + (N % NUM_OF_LETTERS);
             if (*(ciphertext + count) > LOWERCASE_END)
-                *(ciphertext + count) = (*(ciphertext + count) % (LOWERCASE_END + 1)) + LOWERCASE_START;
+            {
+                *(ciphertext + count) = (*(ciphertext + count) % (LOWERCASE_END + 1)) + DIGIT_START; /* WRAP AROUND */
+                if (*(ciphertext + count) > DIGIT_END)
+                    *(ciphertext + count) = *(ciphertext + count) + (UPPERCASE_START - DIGIT_END - 1);
+
+                if (*(ciphertext + count) > UPPERCASE_END)
+                    *(ciphertext + count) = *(ciphertext + count) + (LOWERCASE_START - UPPERCASE_END - 1);
+            }
         }
         else
         {
@@ -141,23 +159,43 @@ uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N)
     while (count < len)
     {
         character = *(ciphertext + count);
-        if (isDigit(character))
+        if (isDigit(character))/* problhma gia kapoious arithmous */
         {
-            *(plaintext + count) = character - (N % NUM_OF_DIGITS);
+            *(plaintext + count) = character - (N % (NUM_OF_DIGITS + NUM_OF_LETTERS * 2));
+            if (*(plaintext + count) < LOWERCASE_START)
+                *(plaintext + count) = *(plaintext + count) - (LOWERCASE_START - UPPERCASE_END - 1);
+
+            if (*(plaintext + count) < UPPERCASE_START)
+                *(plaintext + count) = *(plaintext + count) - (UPPERCASE_START - DIGIT_END - 1);
+
             if (*(plaintext + count) < DIGIT_START)
-                *(plaintext + count) = (*(plaintext + count) - DIGIT_START + 1) % NUM_OF_DIGITS + DIGIT_END;
+                    *(plaintext + count) = *(plaintext + count) + (LOWERCASE_END - DIGIT_START + 1); /* WRAP AROUND */
         }
         else if (isUppercaseLetter(character))
         {
-            *(plaintext + count) = character - (N % NUM_OF_LETTERS);
-            if (*(plaintext + count) < UPPERCASE_START)
-                *(plaintext + count) = (*(plaintext + count) - UPPERCASE_START + 1) % NUM_OF_LETTERS + UPPERCASE_END;
+            *(plaintext + count) = character - (N % (NUM_OF_DIGITS + NUM_OF_LETTERS * 2));
+            if (*(plaintext + count) < UPPERCASE_START){
+                *(plaintext + count) = *(plaintext + count) - (UPPERCASE_START - DIGIT_END - 1);
+                if (*(plaintext + count) < DIGIT_START)
+                    *(plaintext + count) = *(plaintext + count) + (LOWERCASE_END - DIGIT_START + 1); /* WRAP AROUND */
+            }
+            if (*(plaintext + count) < LOWERCASE_START)
+                *(plaintext + count) = *(plaintext + count) - (LOWERCASE_START - UPPERCASE_END - 1);
+
         }
         else if (isLowercaseLetter(character))
         {
-            *(plaintext + count) = character - (N % NUM_OF_LETTERS);
+            *(plaintext + count) = character - (N % (NUM_OF_DIGITS + NUM_OF_LETTERS * 2));
             if (*(plaintext + count) < LOWERCASE_START)
-                *(plaintext + count) = (*(plaintext + count) - LOWERCASE_START + 1) % NUM_OF_LETTERS + LOWERCASE_END;
+                *(plaintext + count) = *(plaintext + count) - (LOWERCASE_START - UPPERCASE_END - 1);
+
+            if (*(plaintext + count) < UPPERCASE_START)
+                *(plaintext + count) = *(plaintext + count) - (UPPERCASE_START - DIGIT_END - 1);
+
+            if (*(plaintext + count) < DIGIT_START)
+                    *(plaintext + count) = *(plaintext + count) + (LOWERCASE_END - DIGIT_START + 1); /* WRAP AROUND */
+
+
         }
         else
         {
@@ -455,7 +493,6 @@ uint8_t *affine_decrypt(uint8_t *ciphertext)
     *(plaintext + length) = '\0';
     return plaintext;
 }
-
 
 int modInverse(int a, int m)
 {
