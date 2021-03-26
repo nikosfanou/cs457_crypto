@@ -12,7 +12,7 @@
 
 /*  N in the range of 0 to 65,535 
     KEY for caesar's cryptography*/
-#define NUM 1
+#define NUM 45
 #define INIT_INPUT_SIZE 128
 
 /* Start of digits in ascii table */
