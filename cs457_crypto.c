@@ -93,7 +93,7 @@ uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N)
     while (count < len)
     {
         character = *(plaintext + count);
-        *(ciphertext + count) = character + (N % (NUM_OF_DIGITS + NUM_OF_LETTERS * 2));
+        *(ciphertext + count) = character + (N % CEASAR_ALPHABET_SIZE);
         if (isDigit(character))
         {
             if (*(ciphertext + count) > DIGIT_END)
@@ -159,52 +159,41 @@ uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N)
     while (count < len)
     {
         character = *(ciphertext + count);
-        if (isDigit(character)) /* problhma gia kapoious arithmous */
+        *(plaintext + count) = character + CEASAR_ALPHABET_SIZE - (N % CEASAR_ALPHABET_SIZE);
+        if (isDigit(character))
         {
-            if ((int)character - (N % (NUM_OF_DIGITS + NUM_OF_LETTERS * 2)) < 0)
-                *(plaintext + count) = character + (LOWERCASE_END - DIGIT_START + 1); /* WRAP AROUND */
-            else
-                *(plaintext + count) = character - (N % (NUM_OF_DIGITS + NUM_OF_LETTERS * 2));
+            if (*(plaintext + count) > DIGIT_END)
+                *(plaintext + count) = *(plaintext + count) + (UPPERCASE_START - DIGIT_END - 1);
 
-            if (*(plaintext + count) < DIGIT_START)
-            {
-                *(plaintext + count) = *(plaintext + count) + (LOWERCASE_END - DIGIT_START + 1); /* WRAP AROUND */
+            if (*(plaintext + count) > UPPERCASE_END)
+                *(plaintext + count) = *(plaintext + count) + (LOWERCASE_START - UPPERCASE_END - 1);
 
-                if (*(plaintext + count) < LOWERCASE_START)
-                    *(plaintext + count) = *(plaintext + count) - (LOWERCASE_START - UPPERCASE_END - 1);
-
-                if (*(plaintext + count) < UPPERCASE_START)
-                    *(plaintext + count) = *(plaintext + count) - (UPPERCASE_START - DIGIT_END - 1);
-            }
+            if (*(plaintext + count) > LOWERCASE_END)
+                *(plaintext + count) = (*(plaintext + count) % (LOWERCASE_END + 1)) + DIGIT_START; /* WRAP AROUND */
         }
         else if (isUppercaseLetter(character))
         {
-            if ((int)character - (N % (NUM_OF_DIGITS + NUM_OF_LETTERS * 2)) < DIGIT_START)
-                *(plaintext + count) = character + (LOWERCASE_END - DIGIT_START + 1); /* WRAP AROUND */
-            else
-                *(plaintext + count) = character - (N % (NUM_OF_DIGITS + NUM_OF_LETTERS * 2));
+            if (*(plaintext + count) > UPPERCASE_END)
+                *(plaintext + count) = *(plaintext + count) + (LOWERCASE_START - UPPERCASE_END - 1);
 
-            if (*(plaintext + count) < UPPERCASE_START)
-                *(plaintext + count) = *(plaintext + count) - (UPPERCASE_START - DIGIT_END - 1);
-
-            if (*(plaintext + count) < DIGIT_START)
+            if (*(plaintext + count) > LOWERCASE_END)
             {
-                *(plaintext + count) = *(plaintext + count) + (LOWERCASE_END - DIGIT_START + 1); /* WRAP AROUND */
-                if (*(plaintext + count) < LOWERCASE_START)
-                    *(plaintext + count) = *(plaintext + count) - (LOWERCASE_START - UPPERCASE_END - 1);
+                *(plaintext + count) = (*(plaintext + count) % (LOWERCASE_END + 1)) + DIGIT_START; /* WRAP AROUND */
+                if (*(plaintext + count) > DIGIT_END)
+                    *(plaintext + count) = *(plaintext + count) + (UPPERCASE_START - DIGIT_END - 1);
             }
         }
         else if (isLowercaseLetter(character))
         {
-            *(plaintext + count) = character - (N % (NUM_OF_DIGITS + NUM_OF_LETTERS * 2));
-            if (*(plaintext + count) < LOWERCASE_START)
-                *(plaintext + count) = *(plaintext + count) - (LOWERCASE_START - UPPERCASE_END - 1);
+            if (*(plaintext + count) > LOWERCASE_END)
+            {
+                *(plaintext + count) = (*(plaintext + count) % (LOWERCASE_END + 1)) + DIGIT_START; /* WRAP AROUND */
+                if (*(plaintext + count) > DIGIT_END)
+                    *(plaintext + count) = *(plaintext + count) + (UPPERCASE_START - DIGIT_END - 1);
 
-            if (*(plaintext + count) < UPPERCASE_START)
-                *(plaintext + count) = *(plaintext + count) - (UPPERCASE_START - DIGIT_END - 1);
-
-            if (*(plaintext + count) < DIGIT_START)
-                *(plaintext + count) = *(plaintext + count) + (LOWERCASE_END - DIGIT_START + 1); /* WRAP AROUND */
+                if (*(plaintext + count) > UPPERCASE_END)
+                    *(plaintext + count) = *(plaintext + count) + (LOWERCASE_START - UPPERCASE_END - 1);
+            }
         }
         else
         {
