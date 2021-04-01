@@ -255,9 +255,9 @@ int main(int argc, char *argv[])
         free_Feistel_Keys(feistel_keys, NUM_OF_ROUNDS);
     }
 
-    /*fprintf(output, "Message:\n%s\n", result);
+    fprintf(output, "Message:\n%s\n", result);
     fprintf(output, "Result len: %lu\n", strlen((char *)result));
-    free(result);*/
+    free(result);
     free(ciphertext);
     free(plaintext);
     fclose(output);

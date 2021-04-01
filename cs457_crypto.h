@@ -104,6 +104,16 @@
 uint8_t *key_generator(size_t plaintext_size);
 
 /**
+ * @brief Gets 2 strings and returns the result of operation xor on them
+ * 
+ * @param str1 A string of size length
+ * @param str2 A second string of size length
+ * @param length The size of the strings
+ * @return uint8_t* The result of the operation xor on str1 and str2
+ */
+void apply_xor(uint8_t *result, uint8_t *str1, uint8_t *str2, size_t length);
+
+/**
  * @brief One-time pad encryption
  * 
  * @param plaintext     Message to be encrypted
