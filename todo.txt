@@ -1,7 +1,5 @@
 1) Na diorthwsw pithanws sxolia.
-2) Sto feistel theloun na kryptografountai ola ? --> erwthsh
-3) Na prosthesw elegxous gia fail malloc
-4) Na ksanadw affine decrypt
-5) Organwsh se fakelous isws
-6) Na allaksw to caesar cipher wste na kanei wrap around otan teleiwnei olo to character set
-(dhladh meta to 9 paei A ktlp)
+2) Na prosthesw elegxous gia fail malloc
+3) Na ksanadw affine decrypt
+4) Organwsh se fakelous isws
+5) Key generator mesa sthn encrypt h eksw?

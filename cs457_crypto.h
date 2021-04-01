@@ -25,7 +25,7 @@
 #define LOWERCASE_END 122
 #define NUM_OF_DIGITS 10
 #define NUM_OF_LETTERS 26
-#define CEASAR_ALPHABET_SIZE    (NUM_OF_DIGITS + 2 * NUM_OF_LETTERS)
+#define CEASAR_ALPHABET_SIZE (NUM_OF_DIGITS + 2 * NUM_OF_LETTERS)
 
 #define KEYMATRIX_SIZE 25
 #define KEYMATRIX_ROWS 5
@@ -44,7 +44,7 @@
 #define B 19
 #define M 26
 
-#define BLOCK_SIZE 64
+#define BLOCK_SIZE 8
 #define NUM_OF_ROUNDS 8
 
 #define ONE_TIME_PAD 1
@@ -94,6 +94,14 @@
  */
 #define sameKeyMatrixColumn(column1, column2) \
     (column1 == column2)
+
+/**
+ * @brief Creates a key with the same size as plaintext using /dev/urandom.
+ * 
+ * @param plaintext Message to be encrypted
+ * @return uint8_t* Returns the key
+ */
+uint8_t *key_generator(size_t plaintext_size);
 
 /**
  * @brief One-time pad encryption
@@ -182,7 +190,7 @@ uint8_t *affine_encrypt(uint8_t *plaintext);
  * @param ciphertext    Message to be decrypted
  * @return uint8_t*     Decrypted message (plaintext)
  */
-uint8_t * affine_decrypt(uint8_t* ciphertext);
+uint8_t *affine_decrypt(uint8_t *ciphertext);
 
 /**
  * @brief   Function taken from geeks for geeks
@@ -203,7 +211,7 @@ int modInverse(int a, int m);
  * @param key       Key for encryption-decryption
  * @return uint8_t* Encrypted/Decrypted message (ciphertext/plaintext)
  */
-uint8_t* feistel_round(uint8_t* block, uint8_t* key);
+uint8_t *feistel_round(uint8_t *block, uint8_t *key);
 
 /**
  * @brief Feistel cipher encryption
@@ -212,7 +220,7 @@ uint8_t* feistel_round(uint8_t* block, uint8_t* key);
  * @param keys          Array of keys for encryption-decryption
  * @return uint8_t*     Encrypted message (ciphertext)
  */
-uint8_t* feistel_encrypt(uint8_t* plaintext, uint8_t keys[]);
+uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t *keys[]);
 
 /**
  * @brief Feistel cipher decryption
@@ -221,7 +229,13 @@ uint8_t* feistel_encrypt(uint8_t* plaintext, uint8_t keys[]);
  * @param keys          Array of keys for encryption-decryption
  * @return uint8_t*     Decrypted message (plaintext)
  */
-uint8_t* feistel_decrypt(uint8_t* ciphertext, uint8_t keys[]);
+uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t *keys[]);
 
-
-void swap(uint8_t *left_block, uint8_t *right_block, unsigned int length);
+/**
+ * @brief   Swaps the left block with the right block.
+ *          So now left == old right and right == old left.
+ * 
+ * @param left_block Left half of a data block
+ * @param right_block Right half of a data block
+ */
+void swap(uint8_t *left_block, uint8_t *right_block);

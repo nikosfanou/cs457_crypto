@@ -35,6 +35,37 @@ queue_t *Jqueue = NULL;
  */
 int message_odd = 0;
 
+uint8_t *key_generator(size_t plaintext_size)
+{
+    uint8_t *key;
+    FILE *randomData;
+    size_t randomDataLen;
+    size_t read_result;
+
+    randomData = fopen("/dev/urandom", "r");
+
+    if (!randomData)
+    {
+        fprintf(stderr, "Failed to open /dev/urandom.\n");
+        exit(EXIT_FAILURE);
+    }
+    randomDataLen = 0;
+    key = (uint8_t *)malloc(sizeof(uint8_t) * (plaintext_size + 1));
+    memset(key, 0, sizeof(uint8_t) * (plaintext_size + 1));
+    while (randomDataLen < plaintext_size)
+    {
+        read_result = fread(key + randomDataLen, sizeof(uint8_t), sizeof(uint8_t), randomData);
+        if (*(key + randomDataLen) == '\0')
+        {
+            continue;
+        }
+        randomDataLen += read_result;
+    }
+    *(key + plaintext_size) = '\0';
+    fclose(randomData);
+    return key;
+}
+
 uint8_t *otp_encrypt(uint8_t *plaintext, uint8_t *key)
 {
     size_t length, counter;
@@ -500,7 +531,6 @@ int modInverse(int a, int m)
             return x;
 }
 
-
 /* AN DEN PAIZEI H STRNCPY
 while(counter < BLOCK_SIZE){
         if(counter < (BLOCK_SIZE / 2)){
@@ -510,42 +540,72 @@ while(counter < BLOCK_SIZE){
         }
         counter ++;
     }*/
-void swap(uint8_t *left_block, uint8_t *right_block, unsigned int length)
+void swap(uint8_t *left_block, uint8_t *right_block)
 {
-    uint8_t * temp_block;
-    /*  left and right block are 32 bytes (not always). Last block can be less
-        but he has full it with terminals(should we?) */
-    temp_block = (uint8_t *)malloc(sizeof(uint8_t) * (length + 1));
-    
-    strncpy(temp_block, right_block, length);
-    temp_block[length] = '\0';
-    strncpy(right_block, left_block, length);
-    strncpy(left_block, temp_block, length);
+    uint8_t *temp_block;
 
-    return ;
+    temp_block = (uint8_t *)malloc(sizeof(uint8_t) * (BLOCK_SIZE / 2 + 1));
+
+    strncpy((char *)temp_block, (char *)right_block, BLOCK_SIZE / 2);
+    temp_block[BLOCK_SIZE / 2] = '\0';
+    strncpy((char *)right_block, (char *)left_block, BLOCK_SIZE / 2);
+    strncpy((char *)left_block, (char *)temp_block, BLOCK_SIZE / 2);
+
+    free(temp_block);
+    return;
 }
 
 uint8_t *feistel_round(uint8_t *block, uint8_t *key)
 {
-    /*  Pairnei to deksi meros ths 64adas -> an einai < 32 bytes prosthetei terminals
+    /*  Pairnei to deksi meros ths 64adas bits -> an einai < 32 bits prosthetei terminals
         Kanei kapoia praksh me to key --> F(K_i,R_i) = (R_i * K_i) mod (2^32)
         */
 }
 
-uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t keys[])
+uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t *keys[])
 {
-    /*  Xwrizw to plaintext se 64ades
+    size_t length, total_blocks, last_block_size, blocks_counter, rounds_counter;
+    uint8_t *left_block, *right_block, *ciphertext, *key;
+    /*  Xwrizw to plaintext se 64ades bits
         Exw 8 kleidia kai gia kathe kleidi
         kalw th round gia kathe deksi miso ths 64adas
         kanw XOR me to aristero miso ths antistoixhs 64adas
         kanw swap to deksi me to aristero meros
         */
     // meta to loop isws ksana swapped?
+    length = strlen((char*) plaintext);
+    ciphertext =  (uint8_t *) malloc (sizeof(uint8_t ) * (length + 1));
+    left_block =  (uint8_t *) malloc (sizeof(uint8_t ) * (BLOCK_SIZE / 2 + 1));
+    right_block = (uint8_t *) malloc (sizeof(uint8_t ) * (BLOCK_SIZE / 2 + 1));
+    total_blocks = length / BLOCK_SIZE;
+    if(last_block_size = (length % BLOCK_SIZE))
+        total_blocks++;
+
+    blocks_counter = 0;
+    rounds_counter = 0;
+    while(rounds_counter < NUM_OF_ROUNDS){
+        key = key_generator(BLOCK_SIZE / 2);
+        strcpy(keys[rounds_counter], key);
+        free(key);
+        key = NULL;
+        while(blocks_counter < total_blocks){
+            strncpy(left_block, plaintext[blocks_counter], BLOCK_SIZE / 2);
+            strncpy(right_block, plaintext[blocks_counter + BLOCK_SIZE / 2], BLOCK_SIZE / 2);
+            feistel_round(right_block, keys[rounds_counter]);
+            //xor left right blocks
+            swap(left_block, right_block);
+            blocks_counter++;
+        }
+        rounds_counter++;
+    }
+    
+    ciphertext[length] = '\0';
+    return ciphertext;
 }
 
-uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t keys[])
+uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t *keys[])
 {
-    /*  Xwrizw to ciphertext se 64ades
+    /*  Xwrizw to ciphertext se 64ades bits
         Exw 8 kleidia kai gia kathe kleidi phgainontas anapoda
         kalw th round gia kathe deksi miso ths 64adas
         kanw XOR me to aristero miso ths antistoixhs 64adas

@@ -14,46 +14,6 @@
 /* Some helpful functions */
 
 /**
- * @brief Creates a key with the same size as plaintext using /dev/urandom.
- * 
- * @param plaintext Message to be encrypted
- * @return uint8_t* Returns the key
- */
-uint8_t *key_generator(uint8_t *plaintext)
-{
-    size_t key_size;
-    uint8_t *key;
-    FILE *randomData;
-    size_t randomDataLen;
-    size_t read_result;
-
-    assert(plaintext);
-    key_size = strlen((char *)plaintext);
-    randomData = fopen("/dev/urandom", "r");
-
-    if (!randomData)
-    {
-        fprintf(stderr, "Failed to open /dev/urandom.\n");
-        exit(EXIT_FAILURE);
-    }
-    randomDataLen = 0;
-    key = (uint8_t *)malloc(sizeof(uint8_t) * (key_size + 1));
-    memset(key, 0, sizeof(uint8_t) * (key_size + 1));
-    while (randomDataLen < key_size)
-    {
-        read_result = fread(key + randomDataLen, sizeof(uint8_t), sizeof(uint8_t), randomData);
-        if (*(key + randomDataLen) == '\0') /*  ayto mporei na fygei tlk an h readplaintext de krataei ta special character. */
-        {
-            continue;
-        }
-        randomDataLen += read_result;
-    }
-    *(key + key_size) = '\0';
-    fclose(randomData);
-    return key;
-}
-
-/**
  * @brief Reads the content of the input file and copies it on a string. Then returns
  * the string.
  * 
@@ -120,29 +80,57 @@ uint8_t *read_plaintext(FILE *input_message)
  * 
  * @param key_matrix 5x5 matrix key
  */
-void print_keymatrix(unsigned char **key_matrix){
+void print_keymatrix(unsigned char **key_matrix)
+{
     uint32_t counter;
     printf("Keymatrix:\n");
-    for(counter = 0; counter < KEYMATRIX_SIZE; counter++){
+    for (counter = 0; counter < KEYMATRIX_SIZE; counter++)
+    {
         printf("%c", key_matrix[counter / KEYMATRIX_ROWS][counter % KEYMATRIX_COLUMNS]);
-        if( (counter % KEYMATRIX_COLUMNS) == 4 )
+        if ((counter % KEYMATRIX_COLUMNS) == 4)
             printf("\n");
     }
     return;
 }
 
+uint8_t **init_Feistel_Keys(unsigned int num_of_keys)
+{
+    uint8_t **feistel_keys;
+    unsigned int counter;
+
+    counter = 0;
+    feistel_keys = (uint8_t **)malloc(sizeof(uint8_t*) * NUM_OF_ROUNDS);
+    while(counter < num_of_keys){
+        feistel_keys[counter] = (uint8_t *)malloc(sizeof(uint8_t) * (BLOCK_SIZE / 2 + 1));
+        //feistel_keys[counter][BLOCK_SIZE / 2] = '\0';
+        counter++;
+    }
+
+    return feistel_keys;
+}
+
+void free_Feistel_Keys(uint8_t ** feistel_keys, unsigned int num_of_keys)
+{
+    unsigned int counter;
+
+    counter = 0;
+    while(counter < num_of_keys){
+        free(feistel_keys[counter]);
+        counter++;
+    }
+    free(feistel_keys);
+
+    return;
+}
+
 int main(int argc, char *argv[])
 {
-    uint8_t *key;
-    uint8_t *plaintext;
-    uint8_t *ciphertext;
-    uint8_t *result;
-    FILE *output;
-    FILE *input;
-    int opt;
+    uint8_t *key, *plaintext, *ciphertext, *result;
+    uint8_t **feistel_keys;
+    FILE *output, *input;
+    int opt, algorithm;
     char *file_name;
-    int algorithm;
-    size_t counter;
+    size_t counter, plaintext_size;
     unsigned char **key_matrix;
 
     output = stdout;
@@ -188,20 +176,20 @@ int main(int argc, char *argv[])
             algorithm = FEISTEL_CIPHER;
             break;
         case 'h':
-            printf (
-            "Options:\n"
-            "   -i \"inputfile\"      The input file.\n"
-            "   -o \"outputfile\"     The output file.\n"
-            "   -1                  If set, the program uses one time pad algorithm for the cryptography.\n"
-            "   -c                  If set, the program uses caesar's cipher algorithm for the cryptography.\n"
-            "   -p                  If set, the program uses playfair cipher algorithm for the cryptography.\n"
-            "   -a                  If set, the program uses affine cipher algorithm for the cryptography.\n"
-            "   -f                  If set, the program uses feistel cipher algorithm for the cryptography.\n"
-            "   -h                  Prints this help\n"
-            "By default:\n"
-            "   Input file stream is stdin.\n"
-            "   Output file stream is stdout.\n"
-            "   Cryptography algorithm is one time pad.\n");
+            printf(
+                "Options:\n"
+                "   -i \"inputfile\"      The input file.\n"
+                "   -o \"outputfile\"     The output file.\n"
+                "   -1                  If set, the program uses one time pad algorithm for the cryptography.\n"
+                "   -c                  If set, the program uses caesar's cipher algorithm for the cryptography.\n"
+                "   -p                  If set, the program uses playfair cipher algorithm for the cryptography.\n"
+                "   -a                  If set, the program uses affine cipher algorithm for the cryptography.\n"
+                "   -f                  If set, the program uses feistel cipher algorithm for the cryptography.\n"
+                "   -h                  Prints this help\n"
+                "By default:\n"
+                "   Input file stream is stdin.\n"
+                "   Output file stream is stdout.\n"
+                "   Cryptography algorithm is one time pad.\n");
             return 0;
         default:
             printf("Wrong command line arguments. Type -i for input file and -o for output file.\n");
@@ -210,12 +198,13 @@ int main(int argc, char *argv[])
     }
 
     plaintext = read_plaintext(input);
+    plaintext_size = strlen((char *)plaintext);
     fprintf(output, "Plaintext:\n%s\n", plaintext);
-    fprintf(output, "Plaintext len: %lu\n\n", strlen((char *)plaintext));
+    fprintf(output, "Plaintext len: %lu\n\n", plaintext_size);
     if (algorithm == ONE_TIME_PAD)
     {
         printf("You chose one time pad algorithm for your encryption.\n");
-        key = key_generator(plaintext);
+        key = key_generator(plaintext_size);
         fprintf(output, "Key: %s\n", key);
         fprintf(output, "Key len: %lu\n\n", strlen((char *)key));
         ciphertext = otp_encrypt(plaintext, key);
@@ -232,9 +221,11 @@ int main(int argc, char *argv[])
         fprintf(output, "Ciphertext:\n%s\n", ciphertext);
         fprintf(output, "Ciphertext len: %lu\n\n", strlen((char *)ciphertext));
         result = caesar_decrypt(ciphertext, NUM);
-    }else if (algorithm == PLAYFAIR_CIPHER){
+    }
+    else if (algorithm == PLAYFAIR_CIPHER)
+    {
         printf("You chose playfair cipher algorithm for your encryption.\n");
-        key_matrix = playfair_keymatrix((unsigned char*)"HELLO WORLD");
+        key_matrix = playfair_keymatrix((unsigned char *)"HELLO WORLD");
         print_keymatrix(key_matrix);
 
         ciphertext = playfair_encrypt(plaintext, key_matrix);
@@ -245,22 +236,29 @@ int main(int argc, char *argv[])
         {
             free(*(key_matrix + counter));
         }
-       free(key_matrix);
-    }else if(algorithm == AFFINE_CIPHER){
+        free(key_matrix);
+    }
+    else if (algorithm == AFFINE_CIPHER)
+    {
         printf("You chose affine cipher algorithm for your encryption.\n");
         ciphertext = affine_encrypt(plaintext);
         fprintf(output, "Ciphertext:\n%s\n", ciphertext);
         fprintf(output, "Ciphertext len: %lu\n\n", strlen((char *)ciphertext));
         result = affine_decrypt(ciphertext);
-    }else if(algorithm == FEISTEL_CIPHER){
-        /*swap(plaintext, plaintext + 4, 4);
-        fprintf(output, "Plaintext: %s\n", plaintext);*/
+    }
+    else if (algorithm == FEISTEL_CIPHER)
+    {
+        printf("You chose feistel cipher algorithm for your encryption.\n");
+        feistel_keys = init_Feistel_Keys(NUM_OF_ROUNDS);
+        ciphertext = feistel_encrypt(plaintext, feistel_keys);
+        
+        free_Feistel_Keys(feistel_keys, NUM_OF_ROUNDS);
     }
 
     /*fprintf(output, "Message:\n%s\n", result);
     fprintf(output, "Result len: %lu\n", strlen((char *)result));
-    free(result);
-    free(ciphertext);   */
+    free(result);*/
+    free(ciphertext);
     free(plaintext);
     fclose(output);
     fclose(input);
