@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
 
     output = stdout;
     input = stdin;
-    algorithm = CAESAR_CIPHER;
+    algorithm = FEISTEL_CIPHER;
     while ((opt = getopt(argc, argv, "i:o:1cpafh")) != -1)
     {
         switch (opt)
@@ -252,13 +252,16 @@ int main(int argc, char *argv[])
         fprintf(output, "Ciphertext:\n%s\n", ciphertext);
         fprintf(output, "Ciphertext len: %lu\n\n", strlen((char *)ciphertext));
         result = affine_decrypt(ciphertext);
+    }else if(algorithm == FEISTEL_CIPHER){
+        /*swap(plaintext, plaintext + 4, 4);
+        fprintf(output, "Plaintext: %s\n", plaintext);*/
     }
 
-    fprintf(output, "Message:\n%s\n", result);
+    /*fprintf(output, "Message:\n%s\n", result);
     fprintf(output, "Result len: %lu\n", strlen((char *)result));
-    free(plaintext);
-    free(ciphertext);
     free(result);
+    free(ciphertext);   */
+    free(plaintext);
     fclose(output);
     fclose(input);
     return 0;

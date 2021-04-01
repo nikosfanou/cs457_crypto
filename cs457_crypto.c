@@ -499,3 +499,57 @@ int modInverse(int a, int m)
         if (((a % m) * (x % m)) % m == 1)
             return x;
 }
+
+
+/* AN DEN PAIZEI H STRNCPY
+while(counter < BLOCK_SIZE){
+        if(counter < (BLOCK_SIZE / 2)){
+            swapped_block[counter] = right_block[counter];
+        }else{
+            swapped_block[counter] = left_block[counter - (BLOCK_SIZE / 2)];
+        }
+        counter ++;
+    }*/
+void swap(uint8_t *left_block, uint8_t *right_block, unsigned int length)
+{
+    uint8_t * temp_block;
+    /*  left and right block are 32 bytes (not always). Last block can be less
+        but he has full it with terminals(should we?) */
+    temp_block = (uint8_t *)malloc(sizeof(uint8_t) * (length + 1));
+    
+    strncpy(temp_block, right_block, length);
+    temp_block[length] = '\0';
+    strncpy(right_block, left_block, length);
+    strncpy(left_block, temp_block, length);
+
+    return ;
+}
+
+uint8_t *feistel_round(uint8_t *block, uint8_t *key)
+{
+    /*  Pairnei to deksi meros ths 64adas -> an einai < 32 bytes prosthetei terminals
+        Kanei kapoia praksh me to key --> F(K_i,R_i) = (R_i * K_i) mod (2^32)
+        */
+}
+
+uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t keys[])
+{
+    /*  Xwrizw to plaintext se 64ades
+        Exw 8 kleidia kai gia kathe kleidi
+        kalw th round gia kathe deksi miso ths 64adas
+        kanw XOR me to aristero miso ths antistoixhs 64adas
+        kanw swap to deksi me to aristero meros
+        */
+    // meta to loop isws ksana swapped?
+}
+
+uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t keys[])
+{
+    /*  Xwrizw to ciphertext se 64ades
+        Exw 8 kleidia kai gia kathe kleidi phgainontas anapoda
+        kalw th round gia kathe deksi miso ths 64adas
+        kanw XOR me to aristero miso ths antistoixhs 64adas
+        kanw swap to deksi me to aristero meros
+        */
+    // meta to loop isws ksana swapped?
+}

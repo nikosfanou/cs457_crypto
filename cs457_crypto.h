@@ -44,6 +44,9 @@
 #define B 19
 #define M 26
 
+#define BLOCK_SIZE 64
+#define NUM_OF_ROUNDS 8
+
 #define ONE_TIME_PAD 1
 #define CAESAR_CIPHER 2
 #define PLAYFAIR_CIPHER 3
@@ -192,24 +195,6 @@ uint8_t * affine_decrypt(uint8_t* ciphertext);
 int modInverse(int a, int m);
 
 /**
- * @brief Feistel cipher encryption
- * 
- * @param plaintext     Message to be encrypted
- * @param keys          Array of keys for encryption-decryption
- * @return uint8_t*     Encrypted message (ciphertext)
- */
-/* uint8_t* feistel_encrypt(uint8_t* plaintext, uint8_t keys[]); */
-
-/**
- * @brief Feistel cipher decryption
- * 
- * @param ciphertext    Message to be decrypted
- * @param keys          Array of keys for encryption-decryption
- * @return uint8_t*     Decrypted message (plaintext)
- */
-/* uint8_t* feistel_decrypt(uint8_t* ciphertext, uint8_t keys[]); */
-
-/**
  * @brief The round function is run on half of the data to be
  * encrypted and its output is XORed with the other half of
  * the data.
@@ -218,4 +203,25 @@ int modInverse(int a, int m);
  * @param key       Key for encryption-decryption
  * @return uint8_t* Encrypted/Decrypted message (ciphertext/plaintext)
  */
-/* uint8_t* round(uint8_t* block, uint8_t* key); */
+uint8_t* feistel_round(uint8_t* block, uint8_t* key);
+
+/**
+ * @brief Feistel cipher encryption
+ * 
+ * @param plaintext     Message to be encrypted
+ * @param keys          Array of keys for encryption-decryption
+ * @return uint8_t*     Encrypted message (ciphertext)
+ */
+uint8_t* feistel_encrypt(uint8_t* plaintext, uint8_t keys[]);
+
+/**
+ * @brief Feistel cipher decryption
+ * 
+ * @param ciphertext    Message to be decrypted
+ * @param keys          Array of keys for encryption-decryption
+ * @return uint8_t*     Decrypted message (plaintext)
+ */
+uint8_t* feistel_decrypt(uint8_t* ciphertext, uint8_t keys[]);
+
+
+void swap(uint8_t *left_block, uint8_t *right_block, unsigned int length);
