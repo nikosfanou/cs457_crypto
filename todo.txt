@@ -2,4 +2,4 @@
 2) Na prosthesw elegxous gia fail malloc
 3) Na ksanadw affine decrypt
 4) Organwsh se fakelous isws
-5) Key generator mesa sthn encrypt h eksw?
+5) Fix feistel

@@ -1,0 +1,25 @@
+Feistel cipher
+In cryptography a Feistel cipher is a symmetric structure used in the construction of block
+ciphers. In a Feistel cipher, encryption and decryption are very similar operations, and both
+consist of iteratively running a function called a "round function" a fixed number of times. A
+Feistel network uses a round function , a function which takes two inputs, a data block and a
+subkey, and returns one output the same size as the data block. In each round, the round
+function is run on half of the data to be encrypted and its output is XORed with the other half of
+the data. This is repeated a fixed number of times, and the final output is the encrypted data.
+
+In the figure above you see the encryption and decryption operations. In order to encrypt a
+plaintext we first separate it in blocks of size S. Each block is then splitted in half. We encrypt
+the left block by XOR-ing it with the output of the round function in each step. We do not apply
+any kind of operations in the right block. Lastly we reverse the order of the blocks (meaning the
+left goes right and the right goes left) and we repeat for n iterations.
+Decryption works in the opposite way.
+
+Implementation details
+For your implementation you should use a block of 64 bits (S = 64) and split the block into two
+equal blocks of 32 bits. In each round you should generate a pseudo-random key and supply it
+as one of the two parameters of the round function. The round function is in the form of F(K_i,
+R_i) = (R_i * K_i) mod (2^32) . “K_i” refers to the key generated in iteration “i” and “R_i” refers
+to the right block of the current iteration “i”. In order to decrypt the cipher you need to use the
+same keys you created in the encryption phase so you need to store them when you run the
+encryption phase. You could use /dev/urandom to generate the keys.In case a block is not 64
+bits you should use padding. The number of rounds should be 8 (n = 8).

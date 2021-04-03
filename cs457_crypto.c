@@ -6,7 +6,7 @@
  */
 
 #include "cs457_crypto.h"
-#include "queue.h"
+#include "queue/queue.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -96,7 +96,6 @@ uint8_t *otp_encrypt(uint8_t *plaintext, uint8_t *key)
     apply_xor(ciphertext, plaintext, key, length);
     return ciphertext;
 }
-
 
 uint8_t *otp_decrypt(uint8_t *ciphertext, uint8_t *key)
 {
@@ -439,14 +438,14 @@ unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
         /* elegxoi gia J */
         if (!queue_is_empty(Jqueue) && queue_peek(Jqueue) == counter)
         {
-            printf("Jqueue sizeA: %u\n", Jqueue->size);
+            //printf("Jqueue sizeA: %u\n", Jqueue->size);
             dequeue(Jqueue);
             *(plaintext + counter) = 'J';
         }
 
         if (!queue_is_empty(Jqueue) && queue_peek(Jqueue) == counter + 1)
         {
-            printf("Jqueue sizeB: %u\n", Jqueue->size);
+            //printf("Jqueue sizeB: %u\n", Jqueue->size);
             dequeue(Jqueue);
             *(plaintext + counter + 1) = 'J';
             continue;
@@ -455,7 +454,7 @@ unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
         /* An kapoios xarakthras htan ontws X mpainei edw */
         if (!queue_is_empty(Xqueue) && queue_peek(Xqueue) == counter + 1)
         {
-            printf("Xqueue size: %u\n", Xqueue->size);
+            //printf("Xqueue size: %u\n", Xqueue->size);
             dequeue(Xqueue);
             continue;
         }
@@ -547,16 +546,18 @@ while(counter < BLOCK_SIZE){
         }
         counter ++;
     }*/
-void swap(uint8_t *left_block, uint8_t *right_block)
+void feistel_swap(uint8_t *left_block, uint8_t *right_block)
 {
     uint8_t *temp_block;
+    size_t length;
 
-    temp_block = (uint8_t *)malloc(sizeof(uint8_t) * (BLOCK_SIZE / 2 + 1));
-
-    strncpy((char *)temp_block, (char *)right_block, BLOCK_SIZE / 2);
-    temp_block[BLOCK_SIZE / 2] = '\0';
-    strncpy((char *)right_block, (char *)left_block, BLOCK_SIZE / 2);
-    strncpy((char *)left_block, (char *)temp_block, BLOCK_SIZE / 2);
+    /* left and right block always have 4 bytes size because of previous padding*/
+    length = BLOCK_SIZE / 2;
+    temp_block = (uint8_t *)malloc(sizeof(uint8_t) * (length + 1));
+    strncpy((char *)temp_block, (char *)right_block, length);
+    temp_block[length] = '\0';
+    strncpy((char *)right_block, (char *)left_block, length);
+    strncpy((char *)left_block, (char *)temp_block, length);
 
     free(temp_block);
     return;
@@ -564,72 +565,142 @@ void swap(uint8_t *left_block, uint8_t *right_block)
 
 uint8_t *feistel_round(uint8_t *block, uint8_t *key)
 {
-    /*  Pairnei to deksi meros ths 64adas bits -> an einai < 32 bits prosthetei terminals
-        Kanei kapoia praksh me to key --> F(K_i,R_i) = (R_i * K_i) mod (2^32)
-        */
-    return block;
+    uint8_t *round_block;
+    size_t counter, length;
+
+    /* left and right block always have 4 bytes size because of previous padding */
+    length = BLOCK_SIZE / 2;
+    round_block = (uint8_t *)malloc(sizeof(uint8_t) * (length + 1));
+    counter = 0;
+    while (counter < length)
+    {
+        round_block[counter] = (block[counter] * key[counter]) % TWO_POWER_FOUR;
+        counter++;
+    }
+    round_block[length] = '\0';
+    return round_block;
+}
+
+/* If the block doesnt have size of n*64 bits we are padding '\0' s.*/
+uint8_t *feistel_padding(uint8_t *block, size_t padding_block_size)
+{
+    size_t block_size;
+    uint8_t *padded_block;
+
+    padded_block = (uint8_t *)malloc(sizeof(uint8_t) * (padding_block_size + 1));
+    block_size = strlen((char *)block);
+    strcpy((char *)padded_block, (char *)block);
+    while (block_size <= padding_block_size)
+    {
+        padded_block[block_size] = '\0';
+        block_size++;
+    }
+
+    return padded_block;
 }
 
 uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t *keys[])
 {
-    size_t length, total_blocks, last_block_size, blocks_counter, rounds_counter;
-    uint8_t *left_block, *right_block, *round_right_block, *ciphertext, *key;
-    /*  Xwrizw to plaintext se 64ades bits
-        Exw 8 kleidia kai gia kathe kleidi
-        kalw th round gia kathe deksi miso ths 64adas
-        kanw XOR me to aristero miso ths antistoixhs 64adas
-        kanw swap to deksi me to aristero meros
-        NA ELENKSW THN PERIPTWSH ME LIGOTERA BITS APO 64
-        */
-    // meta to loop isws ksana swapped?
-    length = strlen((char *)plaintext);
-    ciphertext = (uint8_t *)malloc(sizeof(uint8_t) * (length + 1));
-    left_block = (uint8_t *)malloc(sizeof(uint8_t) * (BLOCK_SIZE / 2 + 1));
-    right_block = (uint8_t *)malloc(sizeof(uint8_t) * (BLOCK_SIZE / 2 + 1));
-    total_blocks = length / BLOCK_SIZE;
-    if (last_block_size = (length % BLOCK_SIZE)) //na dw an tha to kanw edw ayto h ektos while
+    size_t length, total_blocks, blocks_counter, plaintext_size;
+    int rounds_counter;
+    uint8_t *left_block, *right_block, *round_block, *ciphertext, *key, *padded_plaintext;
+
+    plaintext_size = strlen((char *)plaintext);
+    total_blocks = plaintext_size / BLOCK_SIZE;
+    if (plaintext_size % BLOCK_SIZE)
         total_blocks++;
+
+    length = total_blocks * BLOCK_SIZE;
+    padded_plaintext = feistel_padding(plaintext, length);
+    ciphertext =  (uint8_t *)malloc(sizeof(uint8_t) * (length + 1));
+    left_block =  (uint8_t *)malloc(sizeof(uint8_t) * ( (BLOCK_SIZE / 2) + 1));
+    right_block = (uint8_t *)malloc(sizeof(uint8_t) * ( (BLOCK_SIZE / 2) + 1));
+
+    rounds_counter = 0;
+    while (rounds_counter < NUM_OF_ROUNDS)
+    {
+        key = key_generator(BLOCK_SIZE / 2);
+        strcpy((char *)keys[rounds_counter], (char *)key);
+        free(key);
+        key = NULL;
+        rounds_counter++;
+    }
 
     blocks_counter = 0;
     rounds_counter = 0;
     while (blocks_counter < total_blocks)
     {
-        strncpy((char *)left_block, (char *)(plaintext + blocks_counter), BLOCK_SIZE / 2);
-        strncpy((char *)right_block, (char *)(plaintext + blocks_counter + BLOCK_SIZE / 2), BLOCK_SIZE / 2);
+        strncpy((char *)left_block, (char *)(padded_plaintext + (blocks_counter * BLOCK_SIZE)), BLOCK_SIZE / 2);
+        strncpy((char *)right_block, (char *)(padded_plaintext + (blocks_counter * BLOCK_SIZE) + BLOCK_SIZE / 2), BLOCK_SIZE / 2);
+        left_block[BLOCK_SIZE / 2] = '\0';
+        right_block[BLOCK_SIZE / 2] = '\0';
         while (rounds_counter < NUM_OF_ROUNDS)
         {
-            if (!blocks_counter)
-            {
-                key = key_generator(BLOCK_SIZE / 2);
-                strcpy((char *)keys[rounds_counter], (char *)key);
-                free(key);
-                key = NULL;
-            }
-            round_right_block = feistel_round(right_block, keys[rounds_counter]);
-            apply_xor(left_block, left_block, round_right_block, BLOCK_SIZE / 2);
-            swap(left_block, right_block); //ektos an einai h teleytaia epanalipsi ??? H mporw na valw anapoda ta right left stis strncpy
+            round_block = feistel_round(right_block, keys[rounds_counter]);
+            apply_xor(left_block, left_block, round_block, BLOCK_SIZE / 2);
+            feistel_swap(left_block, right_block);
             rounds_counter++;
+            free(round_block);
+            round_block = NULL;
+            //printf("text: %s%s\n", left_block, right_block);
         }
+        //feistel_swap(left_block, right_block);
         rounds_counter = 0;
-        strncpy((char *)(ciphertext + (blocks_counter * (BLOCK_SIZE / 2))), (char *)left_block, BLOCK_SIZE / 2) ; //H mporw na valw anapoda ta right left stis strncpy gia na apofygw to provlima tou swap
-        strncpy((char *)(ciphertext + (blocks_counter * (BLOCK_SIZE / 2)) + BLOCK_SIZE / 2), (char *)right_block, BLOCK_SIZE / 2 );
+        strncpy((char *)(ciphertext + (blocks_counter * BLOCK_SIZE)), (char *)right_block, BLOCK_SIZE / 2);
+        strncpy((char *)(ciphertext + (blocks_counter * BLOCK_SIZE) + BLOCK_SIZE / 2), (char *)left_block, BLOCK_SIZE / 2);
         blocks_counter++;
     }
 
     ciphertext[length] = '\0';
+    //printf("length: %lu\n",length);
     free(left_block);
     free(right_block);
-    free(round_right_block);
+    free(padded_plaintext);
     return ciphertext;
 }
 
-uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t *keys[])
+uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t *keys[], size_t plaintext_size)
 {
-    /*  Xwrizw to ciphertext se 64ades bits
-        Exw 8 kleidia kai gia kathe kleidi phgainontas anapoda
-        kalw th round gia kathe deksi miso ths 64adas
-        kanw XOR me to aristero miso ths antistoixhs 64adas
-        kanw swap to deksi me to aristero meros
-        */
-    // meta to loop isws ksana swapped?
+    size_t length, total_blocks, blocks_counter;
+    int rounds_counter;
+    uint8_t *left_block, *right_block, *round_block, *plaintext;
+
+    total_blocks = plaintext_size / BLOCK_SIZE;
+    if (plaintext_size % BLOCK_SIZE)
+        total_blocks++;
+
+    length = total_blocks * BLOCK_SIZE;
+    plaintext = (uint8_t *)malloc(sizeof(uint8_t) * (length + 1));
+    left_block = (uint8_t *)malloc(sizeof(uint8_t) * ( (BLOCK_SIZE / 2) + 1));
+    right_block = (uint8_t *)malloc(sizeof(uint8_t) * ( (BLOCK_SIZE / 2) + 1));
+
+    blocks_counter = 0;
+    rounds_counter = NUM_OF_ROUNDS - 1;
+    while (blocks_counter < total_blocks)
+    {
+        strncpy((char *)left_block, (char *)(ciphertext + (blocks_counter * BLOCK_SIZE)), BLOCK_SIZE / 2);
+        strncpy((char *)right_block, (char *)(ciphertext + (blocks_counter * BLOCK_SIZE) + BLOCK_SIZE / 2), BLOCK_SIZE / 2);
+        left_block[BLOCK_SIZE / 2] = '\0';
+        right_block[BLOCK_SIZE / 2] = '\0';
+
+        while (rounds_counter >= 0)
+        {
+            round_block = feistel_round(right_block, keys[rounds_counter]);
+            apply_xor(left_block, left_block, round_block, BLOCK_SIZE / 2);
+            feistel_swap(left_block, right_block);
+            rounds_counter--;
+            free(round_block);
+            round_block = NULL;
+            //printf("text: %s%s\n", left_block, right_block);
+        }
+        rounds_counter = NUM_OF_ROUNDS - 1;
+        strncpy((char *)(plaintext + (blocks_counter * BLOCK_SIZE)), (char *)right_block, BLOCK_SIZE / 2);
+        strncpy((char *)(plaintext + (blocks_counter * BLOCK_SIZE) + BLOCK_SIZE / 2), (char *)left_block, BLOCK_SIZE / 2);
+        blocks_counter++;
+    }
+
+    plaintext[length] = '\0';
+    free(left_block);
+    free(right_block);
+    return plaintext;
 }

@@ -9,91 +9,8 @@
 
 #include <stdint.h>
 #include <unistd.h>
+#include "crypto_defines.h"
 
-/*  N in the range of 0 to 65,535 
-    KEY for caesar's cryptography*/
-#define NUM 57894
-#define INIT_INPUT_SIZE 128
-
-/* Start of digits in ascii table */
-#define DIGIT_START 48
-/* End of digits in ascii table */
-#define DIGIT_END 57
-#define UPPERCASE_START 65
-#define LOWERCASE_START 97
-#define UPPERCASE_END 90
-#define LOWERCASE_END 122
-#define NUM_OF_DIGITS 10
-#define NUM_OF_LETTERS 26
-#define CEASAR_ALPHABET_SIZE (NUM_OF_DIGITS + 2 * NUM_OF_LETTERS)
-
-#define KEYMATRIX_SIZE 25
-#define KEYMATRIX_ROWS 5
-#define KEYMATRIX_COLUMNS 5
-
-/*  h apostash metaksy kefalaiwn kai mikrwn xarakthrwn ston pinaka ASCII 
-    Xrhsimevei sthn antikatastash twn mikrwn xarakthrwn se megala. */
-#define UPPER_LOWER_DISTANCE 32
-/*  f(x) = (A * X + B) mod M
-    A is a constant
-    B is the magnitude of the shift
-    X is the letter to encrypt
-    M the number of letters
-*/
-#define A 11
-#define B 19
-#define M 26
-
-#define BLOCK_SIZE 8
-#define NUM_OF_ROUNDS 8
-
-#define ONE_TIME_PAD 1
-#define CAESAR_CIPHER 2
-#define PLAYFAIR_CIPHER 3
-#define AFFINE_CIPHER 4
-#define FEISTEL_CIPHER 5
-
-/**
- * @brief Checks if character is uppercase letter.
- * 
- */
-#define isUppercaseLetter(character) \
-    (character >= UPPERCASE_START && character <= UPPERCASE_END)
-
-/**
- * @brief Checks if character is lowercase letter.
- * 
- */
-#define isLowercaseLetter(character) \
-    (character >= LOWERCASE_START && character <= LOWERCASE_END)
-
-/**
- * @brief Checks if character is digit.
- * 
- */
-#define isDigit(character) \
-    (character >= DIGIT_START && character <= DIGIT_END)
-
-/**
- * @brief Checks if number is odd.
- * 
- */
-#define isOdd(number) \
-    (number % 2)
-
-/**
- * @brief Checks if the two uppercase letters are in the same row in keymatrix.
- * 
- */
-#define sameKeyMatrixRow(row1, row2) \
-    (row1 == row2)
-
-/**
- * @brief Checks if the two uppercase letters are in the same column in keymatrix.
- * 
- */
-#define sameKeyMatrixColumn(column1, column2) \
-    (column1 == column2)
 
 /**
  * @brief Creates a key with the same size as plaintext using /dev/urandom.
@@ -104,12 +21,13 @@
 uint8_t *key_generator(size_t plaintext_size);
 
 /**
- * @brief Gets 2 strings and returns the result of operation xor on them
+ * @brief   Copies on string result the result of the xor operation on
+ *          strings str1, str2 for length bytes.
  * 
- * @param str1 A string of size length
- * @param str2 A second string of size length
+ * @param result A string where the result of the operation xor is copied
+ * @param str1 The first operand
+ * @param str2 The second operand
  * @param length The size of the strings
- * @return uint8_t* The result of the operation xor on str1 and str2
  */
 void apply_xor(uint8_t *result, uint8_t *str1, uint8_t *str2, size_t length);
 
@@ -214,12 +132,13 @@ int modInverse(int a, int m);
 
 /**
  * @brief The round function is run on half of the data to be
- * encrypted and its output is XORed with the other half of
- * the data.
+ * encrypted. Applies the operation F(K_i,R_i) = (R_i * K_i) mod (2^32) bits
+ * where R_i is the right block of plain/cipher text and K_i is the key
+ * in iteration i.
  * 
- * @param block     Block of data to be encrypted/decrypted
+ * @param block     Block of data
  * @param key       Key for encryption-decryption
- * @return uint8_t* Encrypted/Decrypted message (ciphertext/plaintext)
+ * @return uint8_t* The result of the operation
  */
 uint8_t *feistel_round(uint8_t *block, uint8_t *key);
 
@@ -235,17 +154,31 @@ uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t *keys[]);
 /**
  * @brief Feistel cipher decryption
  * 
- * @param ciphertext    Message to be decrypted
- * @param keys          Array of keys for encryption-decryption
- * @return uint8_t*     Decrypted message (plaintext)
+ * @param ciphertext        Message to be decrypted
+ * @param keys              Array of keys for encryption-decryption
+ * @param plaintext_size    The size of the plaintext
+ * @return uint8_t*         Decrypted message (plaintext)
  */
-uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t *keys[]);
+uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t *keys[], size_t plaintext_size);
 
 /**
  * @brief   Swaps the left block with the right block.
- *          So now left == old right and right == old left.
+ *          So now left is equal with old right and right
+ *          is equal with old left.
  * 
  * @param left_block Left half of a data block
  * @param right_block Right half of a data block
  */
-void swap(uint8_t *left_block, uint8_t *right_block);
+void feistel_swap(uint8_t *left_block, uint8_t *right_block);
+
+/**
+ * @brief If the block doesnt have size of n*64 bits
+ * this function creates a new block, copies the old in it 
+ * and fills it with terminal characters until its size
+ * is equal with padding_block_size.
+ * 
+ * @param block Block of data (cipher/plain text)
+ * @param padding_block_size The desired length of the padding block
+ * @return uint8_t* Returns the padding block
+ */
+uint8_t *feistel_padding(uint8_t *block, size_t padding_block_size);

@@ -1,0 +1,41 @@
+Playfair cipher
+The Playfair cipher encrypts pairs of letters (digraphs), instead of single letters as is the case
+with simpler substitution ciphers such as the Caesar Cipher. The key element of this cipher is a
+5x5 grid that represents the key. In order to create the table, the letters of the key are placed in
+the grid, from left to right beginning from the first row. Then the rest of the alphabet’s letters are
+inserted in the grid alphabetically. Each letter is placed once in the grid. Since the 5x5 grid can
+only hold 25 characters J is usually omitted and treated as ‘I’. For example the key grid for the
+pass phrase “HELLO WORLD” will create the following key grid 1 :
+During the encryption the plaintext is broken in groups of two letters. If the letters of the group
+are the same the second letter is replaced with ‘X’. If the number of the letters in the plaintext is
+even, the last letters are grouped with an ‘X’ character. For example, “WILL ATTACK AT
+DAWN” will result in:
+“WI L X AT TA CK AT DA WN”
+For each group of letters:
+If the letters appear on the same row of the key grid, they will be replaced with the letters to their
+immediate right respectively (wrapping around to the left side of the row if a letter in the original
+pair was on the right side of the row). For example, “DA” will be encrypted to “ AB ”.
+If the letters appear on the same column of the key grid, they will be replaced with the letters
+immediately below respectively (wrapping around to the top side of the column if a letter in the
+original pair was on the bottom side of the column). For example, “ LX ” will be encrypted to “ AL ”.
+If the letters are not on the same row or column, they will be replaced with the letters on the
+same row respectively but at the other pair of corners of the rectangle defined by the original
+1 Note that each letter in the key is used only once
+H E L O W
+R D A B C
+F G I K M
+N P Q S T
+U V X Y Z
+pair. The order is important – the first letter of the encrypted pair is the one that lies on the same
+row as the first letter of the plaintext pair. For example “ WI” will be encrypted to “ LM” , “ AT” to
+“ CQ ”, “ CK ” to “ BM ”, etc.
+The ciphertext of the above scenario will be, “LM AL CQ QC BM CQ AB HT”.
+In order to decrypt the message the inverse of the encryption rules is used.
+Implementation details
+The characters that can be found in the alphabet should only be the uppercase characters A-Z,
+thus lowercase characters a-z, digits 0-9 or any other ASCII characters should not be used. You
+should omit character ‘J’ from the key grid and replace any occurence in the plaintext with
+character ‘I’. If the number of letters in the plaintext is even, the last letter of the plaintext must
+be grouped with an ‘X’ character. The function(s) encrypting and decrypting the messages
+should receive as arguments the plain- or cipher-text as well as the keyphrase and should
+return the result of the operation.

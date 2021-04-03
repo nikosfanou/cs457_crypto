@@ -4,8 +4,9 @@ CC = gcc
 
 CRYPTO_LIB = cs457_crypto.h
 CRYPTO_IMP = cs457_crypto.c
-QUEUE_LIB = queue.h
-QUEUE_IMP = queue.c
+CRYPTO_DEF = crypto_defines.h
+QUEUE_LIB = queue/queue.h
+QUEUE_IMP = queue/queue.c
 TEST_FILE = cs457_crypto_test.c
 
 GCC_FLAGS = -pedantic -o

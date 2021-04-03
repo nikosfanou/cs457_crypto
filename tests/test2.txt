@@ -1,0 +1,25 @@
+One-time pad
+The One-Time-Pad (OTP) algorithm is a very simple but yet very strong algorithm in the sense
+that it can not be cracked even with quantum computers. The algorithm pairs each plaintext with
+a random secret key (also referred to as a one-time pad). Specifically, each bit or byte/character
+of the plaintext is combined with the corresponding bit or byte/character from the random secret
+key. One-time pad requires that the secret key is of the same size or longer than the plaintext.
+Implementation details:
+In order to generate a random secret key you will use a pseudorandom generator, such as
+/dev/urandom. The pseudorandom generator will read N random characters from /dev/urandom,
+where N is the number of bytes/characters found in the plaintext. Then, the algorithm will
+encrypt each byte/character of the plaintext by XOR-ing it with the corresponding byte/character
+of the random secret key.
+Since /dev/urandom will return a new random value upon each read, you will first need to
+generate an appropriate sized random secret key and store it in memory in order to successfully
+decrypt the encrypted message. For this functionality you can develop your own separate
+function or macro. Also, since the usage of /dev/urandom is our suggested pseudorandom
+generator, you are advised to use a Linux-based system for the development and testing of the
+OTP algorithm. The function(s) encrypting and decrypting the messages should receive as
+arguments the plain- or cipher-text as well as the random secret key and should return the result
+of the operation. Special characters, such as “!”, “@”, “*”, etc. that are not part of the english
+alphabet should be skipped as if the character set only consists of numbers 0-9 followed by
+uppercase characters A-Z and lowercase characters a-z. The same applies for all the rest of the
+printable and non-printable ASCII characters such as “\n”, “\t”, “\0” etc. Notice that XOR-ing
+specific characters together might result in non-printable characters or even “\0”. For this reason
+you should think around this problem when handling and printing any results.

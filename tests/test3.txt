@@ -1,0 +1,16 @@
+Caesar's cipher
+This technique is one of the simplest and most widely known encryption techniques. It is a type
+of substitution cipher in which each byte/character of the plaintext is replaced by a
+byte/character found at some fixed number of positions down the alphabet/ASCII set. For
+example, given the ASCII character set, a shift of 3 will replace the letter “A” of the plaintext
+with the letter “D” at the ciphertext. Also, a shift of 4 will encrypt the plaintext “hello” as “lipps”.
+The function(s) encrypting and decrypting the messages should receive as arguments the plainor
+cipher-text as well as the random secret key and should return the result of the operation.
+Implementation details:
+The implementation should support numbers, uppercase and lowercase characters. Special
+characters, such as “!”, “@”, “*”, etc. that are not part of the english alphabet should be skipped
+as if the character set only consists of numbers 0-9 followed by uppercase characters A-Z and
+lowercase characters a-z. The same applies for all the rest of the printable and non-printable
+ASCII characters such as “\n”, “\t”, “\0” etc. The function(s) encrypting and decrypting the
+messages should receive as arguments the plain- or cipher-text as well as a positive number
+indicating the number of shifted positions and should return the result of the operation.

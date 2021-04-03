@@ -199,8 +199,8 @@ int main(int argc, char *argv[])
 
     plaintext = read_plaintext(input);
     plaintext_size = strlen((char *)plaintext);
-    fprintf(output, "Plaintext:\n%s\n", plaintext);
-    fprintf(output, "Plaintext len: %lu\n\n", plaintext_size);
+    //fprintf(output, "Plaintext:\n%s\n", plaintext);
+    //fprintf(output, "Plaintext len: %lu\n\n", plaintext_size);
     if (algorithm == ONE_TIME_PAD)
     {
         printf("You chose one time pad algorithm for your encryption.\n");
@@ -248,15 +248,17 @@ int main(int argc, char *argv[])
     }
     else if (algorithm == FEISTEL_CIPHER)
     {
-        printf("You chose feistel cipher algorithm for your encryption.\n");
+        //printf("You chose feistel cipher algorithm for your encryption.\n");
         feistel_keys = init_Feistel_Keys(NUM_OF_ROUNDS);
         ciphertext = feistel_encrypt(plaintext, feistel_keys);
-        
+        //fprintf(output, "Ciphertext:\n%s\n", ciphertext);
+        //fprintf(output, "Ciphertext len: %lu\n\n", strlen((char *)ciphertext));
+        result = feistel_decrypt(ciphertext, feistel_keys, plaintext_size);
         free_Feistel_Keys(feistel_keys, NUM_OF_ROUNDS);
     }
 
     fprintf(output, "Message:\n%s\n", result);
-    fprintf(output, "Result len: %lu\n", strlen((char *)result));
+    //fprintf(output, "Result len: %lu\n", strlen((char *)result));
     free(result);
     free(ciphertext);
     free(plaintext);

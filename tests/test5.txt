@@ -1,0 +1,16 @@
+Affine cipher
+The affine cipher is a type of monoalphabetic substitution cipher where each letter is mapped to
+its numeric equivalent, encrypted using a simple mathematical function, and converted back to a
+letter. Each letter is encrypted with the function f(x) = ax + b mod m, where “a” is a constant, “b”
+is the magnitude of the shift and “x” is the letter to encrypt. The formula used, means that each
+letter encrypts to a single letter, thus, the cipher is essentially a standard substitution cipher with
+a rule governing which letter goes to which.
+In order to decipher a letter affine cipher uses a function in the form of D(x) = a^-1 * (x - b) mod
+m, where a^-1 is the modular multiplicative inverse of a mod m. The multiplicative inverse of a
+only exists if a and m are coprime. Hence without the restriction on a , decryption might not be
+possible. The letter x denotes the encrypted letter.
+Implementation details
+The characters that can be found in the alphabet should only be the uppercase characters A-Z,
+thus all lowercase characters should be converted into uppercase. Digits [0-9] and special
+characters should be omitted before the encryption scheme.
+For the cipher function you should use the values: a = 11, b = 19 and m = 26.
