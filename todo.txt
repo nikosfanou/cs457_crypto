@@ -1,5 +1,5 @@
-1) Na diorthwsw pithanws sxolia.
+1) Na diorthwsw/prosthesw pithanws sxolia.
 2) Na prosthesw elegxous gia fail malloc
 3) Na ksanadw affine decrypt
-4) Organwsh se fakelous isws
-5) Fix feistel
+4) Na pernaw kena kai new line stis affine playfair?
+5) Na ftiaksw to readme

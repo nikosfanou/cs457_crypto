@@ -11,118 +11,8 @@
 #include <string.h>
 #include <assert.h>
 
-/* Some helpful functions */
 
-/**
- * @brief Reads the content of the input file and copies it on a string. Then returns
- * the string.
- * 
- * @param input_message Pointer on the input file
- * @return uint8_t*     Message to be encrypted
- */
-uint8_t *read_plaintext(FILE *input_message)
-{
-    int c;
-    int counter;
-    size_t length;
-    uint8_t *plaintext;
 
-    assert(input_message);
-    length = 0;
-    if (input_message == stdin)
-    {
-        counter = 1;
-        plaintext = malloc(sizeof(uint8_t) * (counter * INIT_INPUT_SIZE) + 1);
-        if (!plaintext)
-        {
-            fprintf(stderr, "Malloc failed in read_plaintext().\n");
-            exit(EXIT_FAILURE);
-        }
-
-        c = fgetc(input_message);
-        while (!feof(input_message))
-        {
-            if (length == counter * INIT_INPUT_SIZE)
-            {
-                counter++;
-                plaintext = realloc(plaintext, sizeof(uint8_t) * (counter * INIT_INPUT_SIZE) + 1);
-                if (!plaintext)
-                {
-                    fprintf(stderr, "Realloc failed in read_plaintext().\n");
-                    exit(EXIT_FAILURE);
-                }
-            }
-            *(plaintext + length) = (uint8_t)c;
-            length++;
-            c = fgetc(input_message);
-        }
-    }
-    else
-    {
-        fseek(input_message, 0, SEEK_END);
-        length = ftell(input_message);
-        fseek(input_message, 0, SEEK_SET);
-        plaintext = malloc(sizeof(uint8_t) * (length + 1));
-        if (!plaintext)
-        {
-            fprintf(stderr, "Malloc failed in read_plaintext().\n");
-            exit(EXIT_FAILURE);
-        }
-        fread(plaintext, sizeof(uint8_t), length, input_message);
-    }
-
-    *(plaintext + length) = '\0';
-    return plaintext;
-}
-
-/**
- * @brief Prints the 5x5 keymatrix
- * 
- * @param key_matrix 5x5 matrix key
- */
-void print_keymatrix(unsigned char **key_matrix)
-{
-    uint32_t counter;
-    printf("Keymatrix:\n");
-    for (counter = 0; counter < KEYMATRIX_SIZE; counter++)
-    {
-        printf("%c", key_matrix[counter / KEYMATRIX_ROWS][counter % KEYMATRIX_COLUMNS]);
-        if ((counter % KEYMATRIX_COLUMNS) == 4)
-            printf("\n");
-    }
-    return;
-}
-
-/*uint8_t **init_Feistel_Keys(unsigned int num_of_keys)
-{
-    uint8_t **feistel_keys;
-    unsigned int counter;
-
-    counter = 0;
-    feistel_keys = (uint8_t **)malloc(sizeof(uint8_t*) * NUM_OF_ROUNDS);
-    while(counter < num_of_keys){
-        feistel_keys[counter] = (uint8_t *)malloc(sizeof(uint8_t) * (BLOCK_SIZE / 2 + 1));
-        feistel_keys[counter][BLOCK_SIZE / 2] = '\0';
-        counter++;
-    }
-
-    return feistel_keys;
-}
-
-void free_Feistel_Keys(uint8_t ** feistel_keys, unsigned int num_of_keys)
-{
-    unsigned int counter;
-
-    counter = 0;
-    while(counter < num_of_keys){
-        free(feistel_keys[counter]);
-        counter++;
-    }
-    free(feistel_keys);
-
-    return;
-}
-*/
 int main(int argc, char *argv[])
 {
     uint8_t *key, *plaintext, *ciphertext, *result;
@@ -135,7 +25,7 @@ int main(int argc, char *argv[])
 
     output = stdout;
     input = stdin;
-    algorithm = FEISTEL_CIPHER;
+    algorithm = ONE_TIME_PAD;
     while ((opt = getopt(argc, argv, "i:o:1cpafh")) != -1)
     {
         switch (opt)
@@ -199,8 +89,8 @@ int main(int argc, char *argv[])
 
     plaintext = read_plaintext(input);
     plaintext_size = strlen((char *)plaintext);
-    //fprintf(output, "Plaintext:\n%s\n", plaintext);
-    //fprintf(output, "Plaintext len: %lu\n\n", plaintext_size);
+    fprintf(output, "Plaintext:\n%s\n", plaintext);
+    fprintf(output, "Plaintext len: %lu\n\n", plaintext_size);
     if (algorithm == ONE_TIME_PAD)
     {
         printf("You chose one time pad algorithm for your encryption.\n");
@@ -248,17 +138,15 @@ int main(int argc, char *argv[])
     }
     else if (algorithm == FEISTEL_CIPHER)
     {
-        //printf("You chose feistel cipher algorithm for your encryption.\n");
-        //feistel_keys = init_Feistel_Keys(NUM_OF_ROUNDS);
+        printf("You chose feistel cipher algorithm for your encryption.\n");
         ciphertext = feistel_encrypt(plaintext, feistel_keys);
-        //fprintf(output, "Ciphertext:\n%s\n", ciphertext);
-        //fprintf(output, "Ciphertext len: %lu\n\n", strlen((char *)ciphertext));
+        fprintf(output, "Ciphertext:\n%s\n", ciphertext);
+        fprintf(output, "Ciphertext len: %lu\n\n", strlen((char *)ciphertext));
         result = feistel_decrypt(ciphertext, feistel_keys, plaintext_size);
-        //free_Feistel_Keys(feistel_keys, NUM_OF_ROUNDS);
     }
 
     fprintf(output, "Message:\n%s\n", result);
-    //fprintf(output, "Result len: %lu\n", strlen((char *)result));
+    fprintf(output, "Result len: %lu\n", strlen((char *)result));
     free(result);
     free(ciphertext);
     free(plaintext);

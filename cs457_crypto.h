@@ -10,7 +10,17 @@
 #include <stdint.h>
 #include <unistd.h>
 #include "crypto_defines.h"
+#include <stdio.h>
 
+
+/**
+ * @brief Reads the content of the input file and copies it on a string. Then returns
+ * the string.
+ * 
+ * @param input_message Pointer on the input file
+ * @return uint8_t*     Message to be encrypted
+ */
+uint8_t *read_plaintext(FILE *input_message);
 
 /**
  * @brief Creates a key with the same size as plaintext using /dev/urandom.
@@ -92,6 +102,13 @@ unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key);
  * @return unsigned**   5x5 matrix key
  */
 unsigned char **playfair_keymatrix(unsigned char *key);
+
+/**
+ * @brief Prints the 5x5 keymatrix
+ * 
+ * @param key_matrix 5x5 matrix key
+ */
+void print_keymatrix(unsigned char **key_matrix);
 
 /**
  * @brief   Gets the position of letter on Keymatrix object 

@@ -35,6 +35,63 @@ queue_t *Jqueue = NULL;
  */
 int message_odd = 0;
 
+
+uint8_t *read_plaintext(FILE *input_message)
+{
+    int c;
+    int counter;
+    size_t length;
+    uint8_t *plaintext;
+
+    assert(input_message);
+    length = 0;
+    if (input_message == stdin)
+    {
+        counter = 1;
+        plaintext = malloc(sizeof(uint8_t) * (counter * INIT_INPUT_SIZE) + 1);
+        if (!plaintext)
+        {
+            fprintf(stderr, "Malloc failed in read_plaintext().\n");
+            exit(EXIT_FAILURE);
+        }
+
+        c = fgetc(input_message);
+        while (!feof(input_message))
+        {
+            if (length == counter * INIT_INPUT_SIZE)
+            {
+                counter++;
+                plaintext = realloc(plaintext, sizeof(uint8_t) * (counter * INIT_INPUT_SIZE) + 1);
+                if (!plaintext)
+                {
+                    fprintf(stderr, "Realloc failed in read_plaintext().\n");
+                    exit(EXIT_FAILURE);
+                }
+            }
+            *(plaintext + length) = (uint8_t)c;
+            length++;
+            c = fgetc(input_message);
+        }
+    }
+    else
+    {
+        fseek(input_message, 0, SEEK_END);
+        length = ftell(input_message);
+        fseek(input_message, 0, SEEK_SET);
+        plaintext = malloc(sizeof(uint8_t) * (length + 1));
+        if (!plaintext)
+        {
+            fprintf(stderr, "Malloc failed in read_plaintext().\n");
+            exit(EXIT_FAILURE);
+        }
+        fread(plaintext, sizeof(uint8_t), length, input_message);
+    }
+
+    *(plaintext + length) = '\0';
+    return plaintext;
+}
+
+
 uint8_t *key_generator(size_t plaintext_size)
 {
     uint8_t *key;
@@ -66,6 +123,7 @@ uint8_t *key_generator(size_t plaintext_size)
     return key;
 }
 
+
 void apply_xor(uint8_t *result, uint8_t *str1, uint8_t *str2, size_t length)
 {
     size_t counter;
@@ -84,6 +142,7 @@ void apply_xor(uint8_t *result, uint8_t *str1, uint8_t *str2, size_t length)
     return;
 }
 
+
 uint8_t *otp_encrypt(uint8_t *plaintext, uint8_t *key)
 {
     size_t length;
@@ -94,8 +153,10 @@ uint8_t *otp_encrypt(uint8_t *plaintext, uint8_t *key)
     length = strlen((char *)plaintext);
     ciphertext = malloc(sizeof(uint8_t) * (length + 1));
     apply_xor(ciphertext, plaintext, key, length);
+    ciphertext[length] = '\0';
     return ciphertext;
 }
+
 
 uint8_t *otp_decrypt(uint8_t *ciphertext, uint8_t *key)
 {
@@ -107,8 +168,10 @@ uint8_t *otp_decrypt(uint8_t *ciphertext, uint8_t *key)
     length = strlen((char *)key);
     plaintext = malloc(sizeof(uint8_t) * (length + 1));
     apply_xor(plaintext, ciphertext, key, length);
+    plaintext[length] = '\0';
     return plaintext;
 }
+
 
 uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N)
 {
@@ -175,6 +238,7 @@ uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N)
     *(ciphertext + count) = '\0';
     return ciphertext;
 }
+
 
 uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N)
 {
@@ -307,6 +371,21 @@ unsigned char **playfair_keymatrix(unsigned char *key)
     return key_matrix;
 }
 
+
+void print_keymatrix(unsigned char **key_matrix)
+{
+    uint32_t counter;
+    printf("Keymatrix:\n");
+    for (counter = 0; counter < KEYMATRIX_SIZE; counter++)
+    {
+        printf("%c", key_matrix[counter / KEYMATRIX_ROWS][counter % KEYMATRIX_COLUMNS]);
+        if ((counter % KEYMATRIX_COLUMNS) == 4)
+            printf("\n");
+    }
+    return;
+}
+
+
 void getPositionOnKeymatrix(unsigned char **keymatrix, unsigned char letter, size_t *row, size_t *column)
 {
     size_t counter;
@@ -322,6 +401,7 @@ void getPositionOnKeymatrix(unsigned char **keymatrix, unsigned char letter, siz
     }
     return;
 }
+
 
 unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
 {
@@ -402,6 +482,7 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
     return ciphertext;
 }
 
+
 unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
 {
     size_t length, counter, columnOfFirst, columnOfSecond, rowOfFirst, rowOfSecond;
@@ -475,6 +556,7 @@ unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
     return plaintext;
 }
 
+
 uint8_t *affine_encrypt(uint8_t *plaintext)
 {
     size_t counter, length, ciphertext_size;
@@ -511,6 +593,7 @@ uint8_t *affine_encrypt(uint8_t *plaintext)
     return ciphertext;
 }
 
+
 uint8_t *affine_decrypt(uint8_t *ciphertext)
 {
     uint8_t *plaintext;
@@ -529,6 +612,7 @@ uint8_t *affine_decrypt(uint8_t *ciphertext)
     return plaintext;
 }
 
+
 int modInverse(int a, int m)
 {
     int x;
@@ -536,6 +620,7 @@ int modInverse(int a, int m)
         if (((a % m) * (x % m)) % m == 1)
             return x;
 }
+
 
 void feistel_swap(uint8_t *left_block, uint8_t *right_block)
 {
@@ -553,6 +638,7 @@ void feistel_swap(uint8_t *left_block, uint8_t *right_block)
     free(temp_block);
     return;
 }
+
 
 uint8_t *feistel_round(uint8_t *block, uint8_t *key)
 {
@@ -572,6 +658,7 @@ uint8_t *feistel_round(uint8_t *block, uint8_t *key)
     return round_block;
 }
 
+
 /* If the block doesnt have size of n*64 bits we are padding '\0' s.*/
 uint8_t *feistel_padding(uint8_t *block, size_t padding_block_size)
 {
@@ -580,16 +667,18 @@ uint8_t *feistel_padding(uint8_t *block, size_t padding_block_size)
 
     padded_block = (uint8_t *)malloc(sizeof(uint8_t) * (padding_block_size + 1));
     block_size = strlen((char *)block);
+    memset(padded_block, 0, padding_block_size);
     memcpy(padded_block, block, sizeof(uint8_t) * block_size );
     //isws memset anti aytou
-    while (block_size <= padding_block_size)
+    /*(while (block_size <= padding_block_size)
     {
         padded_block[block_size] = '\0';
         block_size++;
-    }
+    }*/
 
     return padded_block;
 }
+
 
 uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t keys[][(BLOCK_SIZE / 2) + 1])
 {
@@ -648,6 +737,7 @@ uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t keys[][(BLOCK_SIZE / 2) + 1
     free(padded_plaintext);
     return ciphertext;
 }
+
 
 uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t keys[][(BLOCK_SIZE / 2) + 1], size_t plaintext_size)
 {
