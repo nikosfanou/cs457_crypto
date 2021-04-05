@@ -80,7 +80,7 @@ void apply_xor(uint8_t *result, uint8_t *str1, uint8_t *str2, size_t length)
         *(result + counter) = *(str1 + counter) ^ *(str2 + counter);
         counter++;
     }
-    *(result + length) = '\0';
+    //*(result + length) = '\0';
     return;
 }
 
@@ -537,15 +537,6 @@ int modInverse(int a, int m)
             return x;
 }
 
-/* AN DEN PAIZEI H STRNCPY
-while(counter < BLOCK_SIZE){
-        if(counter < (BLOCK_SIZE / 2)){
-            swapped_block[counter] = right_block[counter];
-        }else{
-            swapped_block[counter] = left_block[counter - (BLOCK_SIZE / 2)];
-        }
-        counter ++;
-    }*/
 void feistel_swap(uint8_t *left_block, uint8_t *right_block)
 {
     uint8_t *temp_block;
@@ -554,10 +545,10 @@ void feistel_swap(uint8_t *left_block, uint8_t *right_block)
     /* left and right block always have 4 bytes size because of previous padding*/
     length = BLOCK_SIZE / 2;
     temp_block = (uint8_t *)malloc(sizeof(uint8_t) * (length + 1));
-    strncpy((char *)temp_block, (char *)right_block, length);
-    temp_block[length] = '\0';
-    strncpy((char *)right_block, (char *)left_block, length);
-    strncpy((char *)left_block, (char *)temp_block, length);
+    memcpy(temp_block, right_block, sizeof(uint8_t) * length);
+    //temp_block[length] = '\0';
+    memcpy(right_block, left_block, sizeof(uint8_t) * length);
+    memcpy(left_block, temp_block, sizeof(uint8_t) * length);
 
     free(temp_block);
     return;
@@ -577,7 +568,7 @@ uint8_t *feistel_round(uint8_t *block, uint8_t *key)
         round_block[counter] = (block[counter] * key[counter]) % TWO_POWER_FOUR;
         counter++;
     }
-    round_block[length] = '\0';
+    //round_block[length] = '\0';
     return round_block;
 }
 
@@ -589,7 +580,8 @@ uint8_t *feistel_padding(uint8_t *block, size_t padding_block_size)
 
     padded_block = (uint8_t *)malloc(sizeof(uint8_t) * (padding_block_size + 1));
     block_size = strlen((char *)block);
-    strcpy((char *)padded_block, (char *)block);
+    memcpy(padded_block, block, sizeof(uint8_t) * block_size );
+    //isws memset anti aytou
     while (block_size <= padding_block_size)
     {
         padded_block[block_size] = '\0';
@@ -599,7 +591,7 @@ uint8_t *feistel_padding(uint8_t *block, size_t padding_block_size)
     return padded_block;
 }
 
-uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t *keys[])
+uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t keys[][(BLOCK_SIZE / 2) + 1])
 {
     size_t length, total_blocks, blocks_counter, plaintext_size;
     int rounds_counter;
@@ -620,7 +612,8 @@ uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t *keys[])
     while (rounds_counter < NUM_OF_ROUNDS)
     {
         key = key_generator(BLOCK_SIZE / 2);
-        strcpy((char *)keys[rounds_counter], (char *)key);
+        memcpy(keys[rounds_counter], key, sizeof(uint8_t) * (BLOCK_SIZE / 2));
+        //keys[rounds_counter][BLOCK_SIZE / 2] = '\0';
         free(key);
         key = NULL;
         rounds_counter++;
@@ -630,10 +623,10 @@ uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t *keys[])
     rounds_counter = 0;
     while (blocks_counter < total_blocks)
     {
-        strncpy((char *)left_block, (char *)(padded_plaintext + (blocks_counter * BLOCK_SIZE)), BLOCK_SIZE / 2);
-        strncpy((char *)right_block, (char *)(padded_plaintext + (blocks_counter * BLOCK_SIZE) + BLOCK_SIZE / 2), BLOCK_SIZE / 2);
-        left_block[BLOCK_SIZE / 2] = '\0';
-        right_block[BLOCK_SIZE / 2] = '\0';
+        memcpy(left_block, (padded_plaintext + (blocks_counter * BLOCK_SIZE)), sizeof(uint8_t) * (BLOCK_SIZE / 2));
+        memcpy(right_block, (padded_plaintext + (blocks_counter * BLOCK_SIZE) + BLOCK_SIZE / 2), sizeof(uint8_t) * (BLOCK_SIZE / 2));
+        //left_block[BLOCK_SIZE / 2] = '\0';
+        //right_block[BLOCK_SIZE / 2] = '\0';
         while (rounds_counter < NUM_OF_ROUNDS)
         {
             round_block = feistel_round(right_block, keys[rounds_counter]);
@@ -642,24 +635,21 @@ uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t *keys[])
             rounds_counter++;
             free(round_block);
             round_block = NULL;
-            //printf("text: %s%s\n", left_block, right_block);
         }
-        //feistel_swap(left_block, right_block);
         rounds_counter = 0;
-        strncpy((char *)(ciphertext + (blocks_counter * BLOCK_SIZE)), (char *)right_block, BLOCK_SIZE / 2);
-        strncpy((char *)(ciphertext + (blocks_counter * BLOCK_SIZE) + BLOCK_SIZE / 2), (char *)left_block, BLOCK_SIZE / 2);
+        memcpy((ciphertext + (blocks_counter * BLOCK_SIZE)), right_block, sizeof(uint8_t) * (BLOCK_SIZE / 2));
+        memcpy((ciphertext + (blocks_counter * BLOCK_SIZE) + BLOCK_SIZE / 2), left_block, sizeof(uint8_t) * (BLOCK_SIZE / 2));
         blocks_counter++;
     }
 
     ciphertext[length] = '\0';
-    //printf("length: %lu\n",length);
     free(left_block);
     free(right_block);
     free(padded_plaintext);
     return ciphertext;
 }
 
-uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t *keys[], size_t plaintext_size)
+uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t keys[][(BLOCK_SIZE / 2) + 1], size_t plaintext_size)
 {
     size_t length, total_blocks, blocks_counter;
     int rounds_counter;
@@ -678,10 +668,10 @@ uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t *keys[], size_t plaintext_
     rounds_counter = NUM_OF_ROUNDS - 1;
     while (blocks_counter < total_blocks)
     {
-        strncpy((char *)left_block, (char *)(ciphertext + (blocks_counter * BLOCK_SIZE)), BLOCK_SIZE / 2);
-        strncpy((char *)right_block, (char *)(ciphertext + (blocks_counter * BLOCK_SIZE) + BLOCK_SIZE / 2), BLOCK_SIZE / 2);
-        left_block[BLOCK_SIZE / 2] = '\0';
-        right_block[BLOCK_SIZE / 2] = '\0';
+        memcpy(left_block, (ciphertext + (blocks_counter * BLOCK_SIZE)), sizeof(uint8_t) * (BLOCK_SIZE / 2));
+        memcpy(right_block, (ciphertext + (blocks_counter * BLOCK_SIZE) + BLOCK_SIZE / 2), sizeof(uint8_t) * (BLOCK_SIZE / 2));
+        //left_block[BLOCK_SIZE / 2] = '\0';
+        //right_block[BLOCK_SIZE / 2] = '\0';
 
         while (rounds_counter >= 0)
         {
@@ -691,11 +681,10 @@ uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t *keys[], size_t plaintext_
             rounds_counter--;
             free(round_block);
             round_block = NULL;
-            //printf("text: %s%s\n", left_block, right_block);
         }
         rounds_counter = NUM_OF_ROUNDS - 1;
-        strncpy((char *)(plaintext + (blocks_counter * BLOCK_SIZE)), (char *)right_block, BLOCK_SIZE / 2);
-        strncpy((char *)(plaintext + (blocks_counter * BLOCK_SIZE) + BLOCK_SIZE / 2), (char *)left_block, BLOCK_SIZE / 2);
+        memcpy((plaintext + (blocks_counter * BLOCK_SIZE)), right_block, sizeof(uint8_t) * (BLOCK_SIZE / 2));
+        memcpy((plaintext + (blocks_counter * BLOCK_SIZE) + BLOCK_SIZE / 2), left_block, sizeof(uint8_t) * (BLOCK_SIZE / 2));
         blocks_counter++;
     }
 

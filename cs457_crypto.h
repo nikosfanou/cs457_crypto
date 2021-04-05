@@ -149,7 +149,7 @@ uint8_t *feistel_round(uint8_t *block, uint8_t *key);
  * @param keys          Array of keys for encryption-decryption
  * @return uint8_t*     Encrypted message (ciphertext)
  */
-uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t *keys[]);
+uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t keys[][(BLOCK_SIZE / 2) + 1]);
 
 /**
  * @brief Feistel cipher decryption
@@ -159,7 +159,7 @@ uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t *keys[]);
  * @param plaintext_size    The size of the plaintext
  * @return uint8_t*         Decrypted message (plaintext)
  */
-uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t *keys[], size_t plaintext_size);
+uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t keys[][(BLOCK_SIZE / 2) + 1], size_t plaintext_size);
 
 /**
  * @brief   Swaps the left block with the right block.

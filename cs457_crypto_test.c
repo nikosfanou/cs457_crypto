@@ -93,7 +93,7 @@ void print_keymatrix(unsigned char **key_matrix)
     return;
 }
 
-uint8_t **init_Feistel_Keys(unsigned int num_of_keys)
+/*uint8_t **init_Feistel_Keys(unsigned int num_of_keys)
 {
     uint8_t **feistel_keys;
     unsigned int counter;
@@ -102,7 +102,7 @@ uint8_t **init_Feistel_Keys(unsigned int num_of_keys)
     feistel_keys = (uint8_t **)malloc(sizeof(uint8_t*) * NUM_OF_ROUNDS);
     while(counter < num_of_keys){
         feistel_keys[counter] = (uint8_t *)malloc(sizeof(uint8_t) * (BLOCK_SIZE / 2 + 1));
-        //feistel_keys[counter][BLOCK_SIZE / 2] = '\0';
+        feistel_keys[counter][BLOCK_SIZE / 2] = '\0';
         counter++;
     }
 
@@ -122,11 +122,11 @@ void free_Feistel_Keys(uint8_t ** feistel_keys, unsigned int num_of_keys)
 
     return;
 }
-
+*/
 int main(int argc, char *argv[])
 {
     uint8_t *key, *plaintext, *ciphertext, *result;
-    uint8_t **feistel_keys;
+    uint8_t feistel_keys[NUM_OF_ROUNDS][(BLOCK_SIZE / 2) + 1];
     FILE *output, *input;
     int opt, algorithm;
     char *file_name;
@@ -249,12 +249,12 @@ int main(int argc, char *argv[])
     else if (algorithm == FEISTEL_CIPHER)
     {
         //printf("You chose feistel cipher algorithm for your encryption.\n");
-        feistel_keys = init_Feistel_Keys(NUM_OF_ROUNDS);
+        //feistel_keys = init_Feistel_Keys(NUM_OF_ROUNDS);
         ciphertext = feistel_encrypt(plaintext, feistel_keys);
         //fprintf(output, "Ciphertext:\n%s\n", ciphertext);
         //fprintf(output, "Ciphertext len: %lu\n\n", strlen((char *)ciphertext));
         result = feistel_decrypt(ciphertext, feistel_keys, plaintext_size);
-        free_Feistel_Keys(feistel_keys, NUM_OF_ROUNDS);
+        //free_Feistel_Keys(feistel_keys, NUM_OF_ROUNDS);
     }
 
     fprintf(output, "Message:\n%s\n", result);
