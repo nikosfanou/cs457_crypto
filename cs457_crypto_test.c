@@ -16,7 +16,7 @@
 int main(int argc, char *argv[])
 {
     uint8_t *key, *plaintext, *ciphertext, *result;
-    uint8_t feistel_keys[NUM_OF_ROUNDS][(BLOCK_SIZE / 2) + 1];
+    uint8_t feistel_keys[NUM_OF_ROUNDS][BLOCK_SIZE / 2];
     FILE *output, *input;
     int opt, algorithm;
     char *file_name;

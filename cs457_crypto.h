@@ -14,8 +14,8 @@
 
 
 /**
- * @brief Reads the content of the input file and copies it on a string. Then returns
- * the string.
+ * @brief   Reads the content of the input file and copies it on a string. Then returns
+ *          the string.
  * 
  * @param input_message Pointer on the input file
  * @return uint8_t*     Message to be encrypted
@@ -23,10 +23,10 @@
 uint8_t *read_plaintext(FILE *input_message);
 
 /**
- * @brief Creates a key with the same size as plaintext using /dev/urandom.
+ * @brief   Creates a key with the same size as plaintext using /dev/urandom.
  * 
- * @param plaintext Message to be encrypted
- * @return uint8_t* Returns the key
+ * @param plaintext     Message to be encrypted
+ * @return uint8_t*     Returns the key
  */
 uint8_t *key_generator(size_t plaintext_size);
 
@@ -34,33 +34,33 @@ uint8_t *key_generator(size_t plaintext_size);
  * @brief   Copies on string result the result of the xor operation on
  *          strings str1, str2 for length bytes.
  * 
- * @param result A string where the result of the operation xor is copied
- * @param str1 The first operand
- * @param str2 The second operand
- * @param length The size of the strings
+ * @param result    A string where the result of the operation xor is copied
+ * @param str1      The first operand
+ * @param str2      The second operand
+ * @param length    The size of the strings
  */
 void apply_xor(uint8_t *result, uint8_t *str1, uint8_t *str2, size_t length);
 
 /**
- * @brief One-time pad encryption
+ * @brief   One-time pad encryption
  * 
  * @param plaintext     Message to be encrypted
- * @param key Key for   encryption-decryption
+ * @param key           Key for encryption-decryption
  * @return uint8_t*     Encrypted message (ciphertext)
  */
 uint8_t *otp_encrypt(uint8_t *plaintext, uint8_t *key);
 
 /**
- * @brief One-time pad decryption
+ * @brief   One-time pad decryption
  * 
  * @param ciphertext    Message to be decrypted
- * @param key Key for   encryption-decryption
+ * @param key           Key for encryption-decryption
  * @return uint8_t*     Decrypted message (plaintext)
  */
 uint8_t *otp_decrypt(uint8_t *ciphertext, uint8_t *key);
 
 /**
- * @brief Caesar's cipher encryption
+ * @brief   Caesar's cipher encryption with alphabet [0-9A-Za-z]
  * 
  * @param plaintext     Message to be encrypted
  * @param N             N-positions down the alphabet for the encryption of a character
@@ -69,16 +69,16 @@ uint8_t *otp_decrypt(uint8_t *ciphertext, uint8_t *key);
 uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N);
 
 /**
- * @brief Caesar's cipher decryption
+ * @brief   Caesar's cipher decryption with alphabet [0-9A-Za-z]
  * 
  * @param ciphertext    Message to be decrypted
- * @param N             N-positions down the alphabet for the encryption of a character
+ * @param N             N-positions up the alphabet for the decryption of a character
  * @return uint8_t*     Decrypted message (plaintext)
  */
 uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N);
 
 /**
- * @brief Playfair cipher encryption
+ * @brief   Playfair cipher encryption
  * 
  * @param plaintext     Message to be encrypted
  * @param key           5x5 matrix key for encryption-decryption
@@ -87,7 +87,7 @@ uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N);
 unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key);
 
 /**
- * @brief Playfair cipher decryption
+ * @brief   Playfair cipher decryption
  * 
  * @param ciphertext    Message to be decrypted
  * @param key           5x5 matrix key for encryption-decryption
@@ -96,17 +96,17 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key);
 unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key);
 
 /**
- * @brief Creates and returns a 5x5 matrix key
+ * @brief   Creates and returns a 5x5 matrix key
  * 
- * @param key           Key for encryption-decryption
+ * @param key           Key for the creation of 5x5 matrix key
  * @return unsigned**   5x5 matrix key
  */
 unsigned char **playfair_keymatrix(unsigned char *key);
 
 /**
- * @brief Prints the 5x5 keymatrix
+ * @brief   Prints the 5x5 keymatrix
  * 
- * @param key_matrix 5x5 matrix key
+ * @param key_matrix    5x5 matrix key
  */
 void print_keymatrix(unsigned char **key_matrix);
 
@@ -122,7 +122,7 @@ void print_keymatrix(unsigned char **key_matrix);
 void getPositionOnKeymatrix(unsigned char **keymatrix, unsigned char letter, size_t *row, size_t *column);
 
 /**
- * @brief Affine cipher encryption
+ * @brief   Affine cipher encryption
  * 
  * @param plaintext     Message to be encrypted
  * @return uint8_t*     Encrypted message (ciphertext)
@@ -130,7 +130,7 @@ void getPositionOnKeymatrix(unsigned char **keymatrix, unsigned char letter, siz
 uint8_t *affine_encrypt(uint8_t *plaintext);
 
 /**
- * @brief Affine cipher decryption
+ * @brief   Affine cipher decryption
  * 
  * @param ciphertext    Message to be decrypted
  * @return uint8_t*     Decrypted message (plaintext)
@@ -141,17 +141,16 @@ uint8_t *affine_decrypt(uint8_t *ciphertext);
  * @brief   Function taken from geeks for geeks
  *          Given two integers ‘a’ and ‘m’, finds modular multiplicative inverse of ‘a’ under modulo ‘m’.
  * 
- * @param a The integer a
- * @param m The integer m
- * @return int Returns modular multiplicative inverse of ‘a’ under modulo ‘m’.
+ * @param a     The integer a
+ * @param m     The integer m
+ * @return int  Returns modular multiplicative inverse of ‘a’ under modulo ‘m’.
  */
 int modInverse(int a, int m);
 
 /**
- * @brief The round function is run on half of the data to be
- * encrypted. Applies the operation F(K_i,R_i) = (R_i * K_i) mod (2^32) bits
- * where R_i is the right block of plain/cipher text and K_i is the key
- * in iteration i.
+ * @brief   Applies the operation F(K_i,R_i) = (R_i * K_i) mod (2^32) bits
+ *          where R_i is the block (right block of plain/cipher text) and K_i
+ *          is the key in iteration i.
  * 
  * @param block     Block of data
  * @param key       Key for encryption-decryption
@@ -160,42 +159,42 @@ int modInverse(int a, int m);
 uint8_t *feistel_round(uint8_t *block, uint8_t *key);
 
 /**
- * @brief Feistel cipher encryption
+ * @brief   Feistel cipher encryption
  * 
  * @param plaintext     Message to be encrypted
  * @param keys          Array of keys for encryption-decryption
  * @return uint8_t*     Encrypted message (ciphertext)
  */
-uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t keys[][(BLOCK_SIZE / 2) + 1]);
+uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t keys[][BLOCK_SIZE / 2]);
 
 /**
- * @brief Feistel cipher decryption
+ * @brief   Feistel cipher decryption
  * 
  * @param ciphertext        Message to be decrypted
  * @param keys              Array of keys for encryption-decryption
  * @param plaintext_size    The size of the plaintext
  * @return uint8_t*         Decrypted message (plaintext)
  */
-uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t keys[][(BLOCK_SIZE / 2) + 1], size_t plaintext_size);
+uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t keys[][BLOCK_SIZE / 2], size_t plaintext_size);
 
 /**
  * @brief   Swaps the left block with the right block.
  *          So now left is equal with old right and right
  *          is equal with old left.
  * 
- * @param left_block Left half of a data block
- * @param right_block Right half of a data block
+ * @param left_block    Left half of a data block
+ * @param right_block   Right half of a data block
  */
 void feistel_swap(uint8_t *left_block, uint8_t *right_block);
 
 /**
- * @brief If the block doesnt have size of n*64 bits
- * this function creates a new block, copies the old in it 
- * and fills it with terminal characters until its size
- * is equal with padding_block_size.
+ * @brief   If the block doesnt have size of n*64 bits
+ *          this function creates a new block, copies the old in it 
+ *          and fills it with terminal characters until its size
+ *          is equal with padding_block_size.
  * 
- * @param block Block of data (cipher/plain text)
- * @param padding_block_size The desired length of the padding block
- * @return uint8_t* Returns the padding block
+ * @param block                 Block of data (cipher/plain text)
+ * @param padding_block_size    The desired length of the padded block
+ * @return uint8_t*             Returns the padded block
  */
 uint8_t *feistel_padding(uint8_t *block, size_t padding_block_size);

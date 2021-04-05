@@ -26,8 +26,8 @@
 #define KEYMATRIX_ROWS 5
 #define KEYMATRIX_COLUMNS 5
 
-/*  h apostash metaksy kefalaiwn kai mikrwn xarakthrwn ston pinaka ASCII 
-    Xrhsimevei sthn antikatastash twn mikrwn xarakthrwn se megala. */
+/*  The distance of the first uppercase and
+    the first lowercase letter in ASCII table. */
 #define UPPER_LOWER_DISTANCE 32
 /*  f(x) = (A * X + B) mod M
     A is a constant

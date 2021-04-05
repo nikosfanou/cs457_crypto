@@ -35,7 +35,6 @@ queue_t *Jqueue = NULL;
  */
 int message_odd = 0;
 
-
 uint8_t *read_plaintext(FILE *input_message)
 {
     int c;
@@ -91,7 +90,6 @@ uint8_t *read_plaintext(FILE *input_message)
     return plaintext;
 }
 
-
 uint8_t *key_generator(size_t plaintext_size)
 {
     uint8_t *key;
@@ -112,6 +110,7 @@ uint8_t *key_generator(size_t plaintext_size)
     while (randomDataLen < plaintext_size)
     {
         read_result = fread(key + randomDataLen, sizeof(uint8_t), sizeof(uint8_t), randomData);
+        /* If random character is terminal then give some other character. */
         if (*(key + randomDataLen) == '\0')
         {
             continue;
@@ -122,7 +121,6 @@ uint8_t *key_generator(size_t plaintext_size)
     fclose(randomData);
     return key;
 }
-
 
 void apply_xor(uint8_t *result, uint8_t *str1, uint8_t *str2, size_t length)
 {
@@ -138,10 +136,8 @@ void apply_xor(uint8_t *result, uint8_t *str1, uint8_t *str2, size_t length)
         *(result + counter) = *(str1 + counter) ^ *(str2 + counter);
         counter++;
     }
-    //*(result + length) = '\0';
     return;
 }
-
 
 uint8_t *otp_encrypt(uint8_t *plaintext, uint8_t *key)
 {
@@ -157,7 +153,6 @@ uint8_t *otp_encrypt(uint8_t *plaintext, uint8_t *key)
     return ciphertext;
 }
 
-
 uint8_t *otp_decrypt(uint8_t *ciphertext, uint8_t *key)
 {
     size_t length, counter;
@@ -171,7 +166,6 @@ uint8_t *otp_decrypt(uint8_t *ciphertext, uint8_t *key)
     plaintext[length] = '\0';
     return plaintext;
 }
-
 
 uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N)
 {
@@ -194,14 +188,22 @@ uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N)
     {
         character = *(plaintext + count);
         *(ciphertext + count) = character + (N % CEASAR_ALPHABET_SIZE);
+        /* If read digit */
         if (isDigit(character))
         {
+            /* If with the addition of N it surpasses digit end then add the amount of letters that exist
+            between digits and uppercase letters in ascii table */
             if (*(ciphertext + count) > DIGIT_END)
                 *(ciphertext + count) = *(ciphertext + count) + (UPPERCASE_START - DIGIT_END - 1);
 
+            /* If with the addition of N and the amount of letters that exist
+            between digits and uppercase letters in ascii table
+            it surpasses uppercase end then add the amount of letters that exist
+            between lowercase and uppercase letters in ascii table */
             if (*(ciphertext + count) > UPPERCASE_END)
                 *(ciphertext + count) = *(ciphertext + count) + (LOWERCASE_START - UPPERCASE_END - 1);
 
+            /* If with the addition of the previous, it surpasses lowercase end then wrap around! */
             if (*(ciphertext + count) > LOWERCASE_END)
                 *(ciphertext + count) = (*(ciphertext + count) % (LOWERCASE_END + 1)) + DIGIT_START; /* WRAP AROUND */
         }
@@ -212,7 +214,7 @@ uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N)
 
             if (*(ciphertext + count) > LOWERCASE_END)
             {
-                *(ciphertext + count) = (*(ciphertext + count) % (LOWERCASE_END + 1)) + DIGIT_START; /* WRAP AROUND */
+                *(ciphertext + count) = (*(ciphertext + count) % (LOWERCASE_END + 1)) + DIGIT_START;
                 if (*(ciphertext + count) > DIGIT_END)
                     *(ciphertext + count) = *(ciphertext + count) + (UPPERCASE_START - DIGIT_END - 1);
             }
@@ -221,7 +223,7 @@ uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N)
         {
             if (*(ciphertext + count) > LOWERCASE_END)
             {
-                *(ciphertext + count) = (*(ciphertext + count) % (LOWERCASE_END + 1)) + DIGIT_START; /* WRAP AROUND */
+                *(ciphertext + count) = (*(ciphertext + count) % (LOWERCASE_END + 1)) + DIGIT_START;
                 if (*(ciphertext + count) > DIGIT_END)
                     *(ciphertext + count) = *(ciphertext + count) + (UPPERCASE_START - DIGIT_END - 1);
 
@@ -238,7 +240,6 @@ uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N)
     *(ciphertext + count) = '\0';
     return ciphertext;
 }
-
 
 uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N)
 {
@@ -260,6 +261,7 @@ uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N)
     while (count < len)
     {
         character = *(ciphertext + count);
+        /* The only difference between encryption and decryption */
         *(plaintext + count) = character + CEASAR_ALPHABET_SIZE - (N % CEASAR_ALPHABET_SIZE);
         if (isDigit(character))
         {
@@ -270,7 +272,7 @@ uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N)
                 *(plaintext + count) = *(plaintext + count) + (LOWERCASE_START - UPPERCASE_END - 1);
 
             if (*(plaintext + count) > LOWERCASE_END)
-                *(plaintext + count) = (*(plaintext + count) % (LOWERCASE_END + 1)) + DIGIT_START; /* WRAP AROUND */
+                *(plaintext + count) = (*(plaintext + count) % (LOWERCASE_END + 1)) + DIGIT_START;
         }
         else if (isUppercaseLetter(character))
         {
@@ -279,7 +281,7 @@ uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N)
 
             if (*(plaintext + count) > LOWERCASE_END)
             {
-                *(plaintext + count) = (*(plaintext + count) % (LOWERCASE_END + 1)) + DIGIT_START; /* WRAP AROUND */
+                *(plaintext + count) = (*(plaintext + count) % (LOWERCASE_END + 1)) + DIGIT_START;
                 if (*(plaintext + count) > DIGIT_END)
                     *(plaintext + count) = *(plaintext + count) + (UPPERCASE_START - DIGIT_END - 1);
             }
@@ -288,7 +290,7 @@ uint8_t *caesar_decrypt(uint8_t *ciphertext, uint16_t N)
         {
             if (*(plaintext + count) > LOWERCASE_END)
             {
-                *(plaintext + count) = (*(plaintext + count) % (LOWERCASE_END + 1)) + DIGIT_START; /* WRAP AROUND */
+                *(plaintext + count) = (*(plaintext + count) % (LOWERCASE_END + 1)) + DIGIT_START;
                 if (*(plaintext + count) > DIGIT_END)
                     *(plaintext + count) = *(plaintext + count) + (UPPERCASE_START - DIGIT_END - 1);
 
@@ -371,7 +373,6 @@ unsigned char **playfair_keymatrix(unsigned char *key)
     return key_matrix;
 }
 
-
 void print_keymatrix(unsigned char **key_matrix)
 {
     uint32_t counter;
@@ -384,7 +385,6 @@ void print_keymatrix(unsigned char **key_matrix)
     }
     return;
 }
-
 
 void getPositionOnKeymatrix(unsigned char **keymatrix, unsigned char letter, size_t *row, size_t *column)
 {
@@ -401,7 +401,6 @@ void getPositionOnKeymatrix(unsigned char **keymatrix, unsigned char letter, siz
     }
     return;
 }
-
 
 unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
 {
@@ -482,7 +481,6 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
     return ciphertext;
 }
 
-
 unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
 {
     size_t length, counter, columnOfFirst, columnOfSecond, rowOfFirst, rowOfSecond;
@@ -556,7 +554,6 @@ unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
     return plaintext;
 }
 
-
 uint8_t *affine_encrypt(uint8_t *plaintext)
 {
     size_t counter, length, ciphertext_size;
@@ -576,6 +573,11 @@ uint8_t *affine_encrypt(uint8_t *plaintext)
                 *(ciphertext + ciphertext_size) = *(plaintext + counter) - UPPER_LOWER_DISTANCE;
                 ciphertext_size++;
             }
+            else if (*(plaintext + counter) == ' ' || *(plaintext + counter) == '\n')
+            {
+                *(ciphertext + ciphertext_size) = *(plaintext + counter);
+                ciphertext_size++;
+            }
             continue;
         }
 
@@ -586,13 +588,13 @@ uint8_t *affine_encrypt(uint8_t *plaintext)
     for (counter = 0; counter < ciphertext_size; counter++)
     {
         /* f(x) = (A * X + B) mod M */
-        *(ciphertext + counter) = ((A * (*(ciphertext + counter) - UPPERCASE_START) + B) % M) + UPPERCASE_START;
+        if((*(ciphertext + counter) != ' ') && (*(ciphertext + counter) != '\n'))
+            *(ciphertext + counter) = ((A * (*(ciphertext + counter) - UPPERCASE_START) + B) % M) + UPPERCASE_START;
     }
 
     *(ciphertext + ciphertext_size) = '\0';
     return ciphertext;
 }
-
 
 uint8_t *affine_decrypt(uint8_t *ciphertext)
 {
@@ -605,13 +607,15 @@ uint8_t *affine_decrypt(uint8_t *ciphertext)
         A^-1 is the modular multiplicative inverse of A mod M*/
     for (counter = 0; counter < length; counter++)
     {
-        *(plaintext + counter) = ((modInverse(A, M) * ((*(ciphertext + counter) + UPPERCASE_START) - B)) % M) + UPPERCASE_START;
+        if((*(ciphertext + counter) != ' ') && (*(ciphertext + counter) != '\n'))
+            *(plaintext + counter) = ((modInverse(A, M) * ((*(ciphertext + counter) + UPPERCASE_START) - B)) % M) + UPPERCASE_START;
+        else
+            *(plaintext + counter) = *(ciphertext + counter);
     }
 
     *(plaintext + length) = '\0';
     return plaintext;
 }
-
 
 int modInverse(int a, int m)
 {
@@ -620,7 +624,6 @@ int modInverse(int a, int m)
         if (((a % m) * (x % m)) % m == 1)
             return x;
 }
-
 
 void feistel_swap(uint8_t *left_block, uint8_t *right_block)
 {
@@ -631,14 +634,12 @@ void feistel_swap(uint8_t *left_block, uint8_t *right_block)
     length = BLOCK_SIZE / 2;
     temp_block = (uint8_t *)malloc(sizeof(uint8_t) * (length + 1));
     memcpy(temp_block, right_block, sizeof(uint8_t) * length);
-    //temp_block[length] = '\0';
     memcpy(right_block, left_block, sizeof(uint8_t) * length);
     memcpy(left_block, temp_block, sizeof(uint8_t) * length);
 
     free(temp_block);
     return;
 }
-
 
 uint8_t *feistel_round(uint8_t *block, uint8_t *key)
 {
@@ -654,10 +655,8 @@ uint8_t *feistel_round(uint8_t *block, uint8_t *key)
         round_block[counter] = (block[counter] * key[counter]) % TWO_POWER_FOUR;
         counter++;
     }
-    //round_block[length] = '\0';
     return round_block;
 }
-
 
 /* If the block doesnt have size of n*64 bits we are padding '\0' s.*/
 uint8_t *feistel_padding(uint8_t *block, size_t padding_block_size)
@@ -668,19 +667,12 @@ uint8_t *feistel_padding(uint8_t *block, size_t padding_block_size)
     padded_block = (uint8_t *)malloc(sizeof(uint8_t) * (padding_block_size + 1));
     block_size = strlen((char *)block);
     memset(padded_block, 0, padding_block_size);
-    memcpy(padded_block, block, sizeof(uint8_t) * block_size );
-    //isws memset anti aytou
-    /*(while (block_size <= padding_block_size)
-    {
-        padded_block[block_size] = '\0';
-        block_size++;
-    }*/
+    memcpy(padded_block, block, sizeof(uint8_t) * block_size);
 
     return padded_block;
 }
 
-
-uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t keys[][(BLOCK_SIZE / 2) + 1])
+uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t keys[][BLOCK_SIZE / 2])
 {
     size_t length, total_blocks, blocks_counter, plaintext_size;
     int rounds_counter;
@@ -693,16 +685,15 @@ uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t keys[][(BLOCK_SIZE / 2) + 1
 
     length = total_blocks * BLOCK_SIZE;
     padded_plaintext = feistel_padding(plaintext, length);
-    ciphertext =  (uint8_t *)malloc(sizeof(uint8_t) * (length + 1));
-    left_block =  (uint8_t *)malloc(sizeof(uint8_t) * ( (BLOCK_SIZE / 2) + 1));
-    right_block = (uint8_t *)malloc(sizeof(uint8_t) * ( (BLOCK_SIZE / 2) + 1));
+    ciphertext = (uint8_t *)malloc(sizeof(uint8_t) * (length + 1));
+    left_block = (uint8_t *)malloc(sizeof(uint8_t) * ((BLOCK_SIZE / 2) + 1));
+    right_block = (uint8_t *)malloc(sizeof(uint8_t) * ((BLOCK_SIZE / 2) + 1));
 
     rounds_counter = 0;
     while (rounds_counter < NUM_OF_ROUNDS)
     {
         key = key_generator(BLOCK_SIZE / 2);
         memcpy(keys[rounds_counter], key, sizeof(uint8_t) * (BLOCK_SIZE / 2));
-        //keys[rounds_counter][BLOCK_SIZE / 2] = '\0';
         free(key);
         key = NULL;
         rounds_counter++;
@@ -714,8 +705,6 @@ uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t keys[][(BLOCK_SIZE / 2) + 1
     {
         memcpy(left_block, (padded_plaintext + (blocks_counter * BLOCK_SIZE)), sizeof(uint8_t) * (BLOCK_SIZE / 2));
         memcpy(right_block, (padded_plaintext + (blocks_counter * BLOCK_SIZE) + BLOCK_SIZE / 2), sizeof(uint8_t) * (BLOCK_SIZE / 2));
-        //left_block[BLOCK_SIZE / 2] = '\0';
-        //right_block[BLOCK_SIZE / 2] = '\0';
         while (rounds_counter < NUM_OF_ROUNDS)
         {
             round_block = feistel_round(right_block, keys[rounds_counter]);
@@ -738,8 +727,7 @@ uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t keys[][(BLOCK_SIZE / 2) + 1
     return ciphertext;
 }
 
-
-uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t keys[][(BLOCK_SIZE / 2) + 1], size_t plaintext_size)
+uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t keys[][BLOCK_SIZE / 2], size_t plaintext_size)
 {
     size_t length, total_blocks, blocks_counter;
     int rounds_counter;
@@ -751,8 +739,8 @@ uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t keys[][(BLOCK_SIZE / 2) + 
 
     length = total_blocks * BLOCK_SIZE;
     plaintext = (uint8_t *)malloc(sizeof(uint8_t) * (length + 1));
-    left_block = (uint8_t *)malloc(sizeof(uint8_t) * ( (BLOCK_SIZE / 2) + 1));
-    right_block = (uint8_t *)malloc(sizeof(uint8_t) * ( (BLOCK_SIZE / 2) + 1));
+    left_block = (uint8_t *)malloc(sizeof(uint8_t) * ((BLOCK_SIZE / 2) + 1));
+    right_block = (uint8_t *)malloc(sizeof(uint8_t) * ((BLOCK_SIZE / 2) + 1));
 
     blocks_counter = 0;
     rounds_counter = NUM_OF_ROUNDS - 1;
@@ -760,8 +748,6 @@ uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t keys[][(BLOCK_SIZE / 2) + 
     {
         memcpy(left_block, (ciphertext + (blocks_counter * BLOCK_SIZE)), sizeof(uint8_t) * (BLOCK_SIZE / 2));
         memcpy(right_block, (ciphertext + (blocks_counter * BLOCK_SIZE) + BLOCK_SIZE / 2), sizeof(uint8_t) * (BLOCK_SIZE / 2));
-        //left_block[BLOCK_SIZE / 2] = '\0';
-        //right_block[BLOCK_SIZE / 2] = '\0';
 
         while (rounds_counter >= 0)
         {
