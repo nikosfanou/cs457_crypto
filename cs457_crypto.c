@@ -106,6 +106,11 @@ uint8_t *key_generator(size_t plaintext_size)
     }
     randomDataLen = 0;
     key = (uint8_t *)malloc(sizeof(uint8_t) * (plaintext_size + 1));
+    if (!key)
+    {
+        fprintf(stderr, "Malloc failed in key_generator().\n");
+        exit(EXIT_FAILURE);
+    }
     memset(key, 0, sizeof(uint8_t) * (plaintext_size + 1));
     while (randomDataLen < plaintext_size)
     {
@@ -148,6 +153,11 @@ uint8_t *otp_encrypt(uint8_t *plaintext, uint8_t *key)
     assert(plaintext);
     length = strlen((char *)plaintext);
     ciphertext = malloc(sizeof(uint8_t) * (length + 1));
+    if (!ciphertext)
+    {
+        fprintf(stderr, "Malloc failed in otp_encrypt().\n");
+        exit(EXIT_FAILURE);
+    }
     apply_xor(ciphertext, plaintext, key, length);
     ciphertext[length] = '\0';
     return ciphertext;
@@ -162,6 +172,11 @@ uint8_t *otp_decrypt(uint8_t *ciphertext, uint8_t *key)
     assert(ciphertext);
     length = strlen((char *)key);
     plaintext = malloc(sizeof(uint8_t) * (length + 1));
+    if (!plaintext)
+    {
+        fprintf(stderr, "Malloc failed in otp_decrypt().\n");
+        exit(EXIT_FAILURE);
+    }
     apply_xor(plaintext, ciphertext, key, length);
     plaintext[length] = '\0';
     return plaintext;
@@ -312,7 +327,7 @@ unsigned char **playfair_keymatrix(unsigned char *key)
 {
     size_t length, counter, matrix_char;
     unsigned char **key_matrix;
-    int alphabet_table[NUM_OF_LETTERS];
+    int alphabet_table[NUM_OF_LETTERS]; /* a table to store if a letter is already in the matrix */
 
     assert(key);
     for (counter = 0; counter < NUM_OF_LETTERS; counter++)
@@ -326,9 +341,19 @@ unsigned char **playfair_keymatrix(unsigned char *key)
 
     /* Key matrix is 5x5 */
     key_matrix = (unsigned char **)malloc(KEYMATRIX_ROWS * sizeof(unsigned char *));
+    if (!key_matrix)
+    {
+        fprintf(stderr, "Malloc failed in playfair_keymatrix().\n");
+        exit(EXIT_FAILURE);
+    }
     for (counter = 0; counter < KEYMATRIX_ROWS; counter++)
     {
         *(key_matrix + counter) = (unsigned char *)malloc(KEYMATRIX_COLUMNS * sizeof(unsigned char));
+        if (!key_matrix[counter])
+        {
+            fprintf(stderr, "Malloc failed in playfair_keymatrix().\n");
+            exit(EXIT_FAILURE);
+        }
     }
 
     for (counter = 0; counter < length; counter++)
@@ -359,6 +384,7 @@ unsigned char **playfair_keymatrix(unsigned char *key)
         }
     }
 
+    /* Add on the matrix the rest letters */
     for (counter = 0; counter < NUM_OF_LETTERS; counter++)
     {
         if (!alphabet_table[counter])
@@ -414,38 +440,43 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
     Xqueue = queue_init();
     Jqueue = queue_init();
 
-    if (isOdd(length))
-        ciphertext = malloc(sizeof(unsigned char) * (length + 2));
-    else
-        ciphertext = malloc(sizeof(unsigned char) * (length + 1));
+    ciphertext = malloc(sizeof(unsigned char) * (length + isOdd(length) + 1));
+    if (!ciphertext)
+    {
+        fprintf(stderr, "Malloc failed in playfair_encrypt().\n");
+        exit(EXIT_FAILURE);
+    }
 
     for (counter = 0; counter < length; counter++)
     {
-        /* kratame mono ta kefalaia */
-        if (!isUppercaseLetter(*(plaintext + counter)))
-            continue;
-        *(ciphertext + ciphertext_size) = *(plaintext + counter);
-        ciphertext_size++;
+        /* Keep only uppercase letters */
+        if (isUppercaseLetter(*(plaintext + counter)))
+        {
+            *(ciphertext + ciphertext_size) = *(plaintext + counter);
+            ciphertext_size++;
+        }
     }
 
     for (counter = 0; counter < ciphertext_size; counter = counter + 2)
     {
-        /* kanw ton prwto elegxo gia na kanw asfalh elegxo tou deyterou */
+        /*  Keep in a queue the positions of X that exist as a second char
+            on a pair of chars (but not the last pair). */
         if ((counter != ciphertext_size - 1) && (*(ciphertext + counter + 1) == 'X'))
             enqueue(Xqueue, counter + 1);
 
-        /*  counter panta zygos ara an mpei sthn epomenh if logw tou prwtou
-            to ciphertext_size einai monos arithmos kai ftasame sth teleytaia dyada (monada mexri twra). */
+        /*  Counter is always even. So if we get in the next if statement because of the first expression
+            it means that ciphertext_size is odd and we reached the last pair (which is one char in reality).
+            So we must make another one pair and we fill it with X.*/
         if ((counter == ciphertext_size - 1) || (*(ciphertext + counter) == *(ciphertext + counter + 1)))
-        {
             *(ciphertext + counter + 1) = 'X';
-        }
     }
+
     message_odd = isOdd(ciphertext_size);
     ciphertext_size = ciphertext_size + isOdd(ciphertext_size);
 
     for (counter = 0; counter < ciphertext_size; counter = counter + 2)
     {
+        /* If found J put I but store the position of J on a queue*/
         if (*(ciphertext + counter) == 'J')
         {
             *(ciphertext + counter) = 'I';
@@ -459,16 +490,22 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
 
         getPositionOnKeymatrix(key, *(ciphertext + counter), &rowOfFirst, &columnOfFirst);
         getPositionOnKeymatrix(key, *(ciphertext + counter + 1), &rowOfSecond, &columnOfSecond);
+        /*  If the characters are on different row and column their encrypted characters
+            are the characters with the same row as them but with the column of the other. */
         if (!sameKeyMatrixRow(rowOfFirst, rowOfSecond) && !sameKeyMatrixColumn(columnOfFirst, columnOfSecond))
         {
             *(ciphertext + counter) = key[rowOfFirst][columnOfSecond];
             *(ciphertext + counter + 1) = key[rowOfSecond][columnOfFirst];
         }
+        /*  If the characters are on the same row their encrypted characters
+            are the characters with the same row as them but with the next (right) column. */
         if (sameKeyMatrixRow(rowOfFirst, rowOfSecond))
         {
             *(ciphertext + counter) = key[rowOfFirst][(columnOfFirst + 1) % KEYMATRIX_COLUMNS];
             *(ciphertext + counter + 1) = key[rowOfSecond][(columnOfSecond + 1) % KEYMATRIX_COLUMNS];
         }
+        /*  If the characters are on the same column their encrypted characters
+            are the characters with the same column as them but with the next (below) row. */
         if (sameKeyMatrixColumn(columnOfFirst, columnOfSecond))
         {
             *(ciphertext + counter) = key[(rowOfFirst + 1) % KEYMATRIX_ROWS][columnOfFirst];
@@ -476,7 +513,6 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
         }
     }
 
-    /* An einai monos arithmos vazoume ena X sto telos kai meta to terminal */
     *(ciphertext + ciphertext_size) = '\0';
     return ciphertext;
 }
@@ -491,20 +527,31 @@ unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
     length = strlen((char *)ciphertext);
 
     plaintext = malloc(sizeof(unsigned char) * (length + 1));
+    if (!plaintext)
+    {
+        fprintf(stderr, "Malloc failed in playfair_decrypt().\n");
+        exit(EXIT_FAILURE);
+    }
     for (counter = 0; counter < length; counter = counter + 2)
     {
         getPositionOnKeymatrix(key, *(ciphertext + counter), &rowOfFirst, &columnOfFirst);
         getPositionOnKeymatrix(key, *(ciphertext + counter + 1), &rowOfSecond, &columnOfSecond);
+        /*  If the characters are on different row and column their encrypted characters
+            are the characters with the same row as them but with the column of the other. */
         if (!sameKeyMatrixRow(rowOfFirst, rowOfSecond) && !sameKeyMatrixColumn(columnOfFirst, columnOfSecond))
         {
             *(plaintext + counter) = key[rowOfFirst][columnOfSecond];
             *(plaintext + counter + 1) = key[rowOfSecond][columnOfFirst];
         }
+        /*  If the characters are on the same row their encrypted characters
+            are the characters with the same row as them but with the previous (left) column. */
         if (sameKeyMatrixRow(rowOfFirst, rowOfSecond))
         {
             *(plaintext + counter) = key[rowOfFirst][(columnOfFirst - 1 + KEYMATRIX_COLUMNS) % KEYMATRIX_COLUMNS];
             *(plaintext + counter + 1) = key[rowOfSecond][(columnOfSecond - 1 + KEYMATRIX_COLUMNS) % KEYMATRIX_COLUMNS];
         }
+        /*  If the characters are on the same column their encrypted characters
+            are the characters with the same column as them but with the previous (above) row. */
         if (sameKeyMatrixColumn(columnOfFirst, columnOfSecond))
         {
             *(plaintext + counter) = key[(rowOfFirst - 1 + KEYMATRIX_ROWS) % KEYMATRIX_ROWS][columnOfFirst];
@@ -514,30 +561,29 @@ unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
 
     for (counter = 0; counter < length; counter = counter + 2)
     {
-        /* elegxoi gia J */
+        /* J replacements */
         if (!queue_is_empty(Jqueue) && queue_peek(Jqueue) == counter)
         {
-            //printf("Jqueue sizeA: %u\n", Jqueue->size);
             dequeue(Jqueue);
             *(plaintext + counter) = 'J';
         }
 
         if (!queue_is_empty(Jqueue) && queue_peek(Jqueue) == counter + 1)
         {
-            //printf("Jqueue sizeB: %u\n", Jqueue->size);
             dequeue(Jqueue);
             *(plaintext + counter + 1) = 'J';
             continue;
         }
 
-        /* An kapoios xarakthras htan ontws X mpainei edw */
+        /* If the second character of the pair was X in plaintext then dequeue and continue */
         if (!queue_is_empty(Xqueue) && queue_peek(Xqueue) == counter + 1)
         {
-            //printf("Xqueue size: %u\n", Xqueue->size);
             dequeue(Xqueue);
             continue;
         }
 
+        /*  If the second character of the pair is X and we reach here, it means that we placed it
+            because of a duplicate character or because of ciphertext fulfillment (plaintext size was odd).*/
         if (*(plaintext + counter + 1) == 'X')
         {
             if ((counter == length - 2) && message_odd)
@@ -561,15 +607,19 @@ uint8_t *affine_encrypt(uint8_t *plaintext)
 
     length = strlen((char *)plaintext);
     ciphertext = malloc(sizeof(uint8_t) * (length + 1));
+    if (!ciphertext)
+    {
+        fprintf(stderr, "Malloc failed in affine_encrypt().\n");
+        exit(EXIT_FAILURE);
+    }
     ciphertext_size = 0;
     for (counter = 0; counter < length; counter++)
     {
-        /* kratame mono ta kefalaia kai ta mikra ta kanoume kefalaia */
+        /* Keep only uppercase letters and convert lowercase to uppercase */
         if (!isUppercaseLetter(*(plaintext + counter)))
         {
             if (isLowercaseLetter(*(plaintext + counter)))
             {
-                //convert to upper
                 *(ciphertext + ciphertext_size) = *(plaintext + counter) - UPPER_LOWER_DISTANCE;
                 ciphertext_size++;
             }
@@ -588,7 +638,7 @@ uint8_t *affine_encrypt(uint8_t *plaintext)
     for (counter = 0; counter < ciphertext_size; counter++)
     {
         /* f(x) = (A * X + B) mod M */
-        if((*(ciphertext + counter) != ' ') && (*(ciphertext + counter) != '\n'))
+        if ((*(ciphertext + counter) != ' ') && (*(ciphertext + counter) != '\n'))
             *(ciphertext + counter) = ((A * (*(ciphertext + counter) - UPPERCASE_START) + B) % M) + UPPERCASE_START;
     }
 
@@ -603,11 +653,16 @@ uint8_t *affine_decrypt(uint8_t *ciphertext)
 
     length = strlen((char *)ciphertext);
     plaintext = malloc(sizeof(uint8_t) * (length + 1));
+    if (!plaintext)
+    {
+        fprintf(stderr, "Malloc failed in affine_decrypt().\n");
+        exit(EXIT_FAILURE);
+    }
     /*  D(x) = A^-1 * (X - B) mod M 
         A^-1 is the modular multiplicative inverse of A mod M*/
     for (counter = 0; counter < length; counter++)
     {
-        if((*(ciphertext + counter) != ' ') && (*(ciphertext + counter) != '\n'))
+        if ((*(ciphertext + counter) != ' ') && (*(ciphertext + counter) != '\n'))
             *(plaintext + counter) = ((modInverse(A, M) * ((*(ciphertext + counter) + UPPERCASE_START) - B)) % M) + UPPERCASE_START;
         else
             *(plaintext + counter) = *(ciphertext + counter);
@@ -633,6 +688,11 @@ void feistel_swap(uint8_t *left_block, uint8_t *right_block)
     /* left and right block always have 4 bytes size because of previous padding*/
     length = BLOCK_SIZE / 2;
     temp_block = (uint8_t *)malloc(sizeof(uint8_t) * (length + 1));
+    if (!temp_block)
+    {
+        fprintf(stderr, "Malloc failed in feistel_swap().\n");
+        exit(EXIT_FAILURE);
+    }
     memcpy(temp_block, right_block, sizeof(uint8_t) * length);
     memcpy(right_block, left_block, sizeof(uint8_t) * length);
     memcpy(left_block, temp_block, sizeof(uint8_t) * length);
@@ -649,6 +709,11 @@ uint8_t *feistel_round(uint8_t *block, uint8_t *key)
     /* left and right block always have 4 bytes size because of previous padding */
     length = BLOCK_SIZE / 2;
     round_block = (uint8_t *)malloc(sizeof(uint8_t) * (length + 1));
+    if (!round_block)
+    {
+        fprintf(stderr, "Malloc failed in feistel_round().\n");
+        exit(EXIT_FAILURE);
+    }
     counter = 0;
     while (counter < length)
     {
@@ -658,13 +723,17 @@ uint8_t *feistel_round(uint8_t *block, uint8_t *key)
     return round_block;
 }
 
-/* If the block doesnt have size of n*64 bits we are padding '\0' s.*/
 uint8_t *feistel_padding(uint8_t *block, size_t padding_block_size)
 {
     size_t block_size;
     uint8_t *padded_block;
 
     padded_block = (uint8_t *)malloc(sizeof(uint8_t) * (padding_block_size + 1));
+    if (!padded_block)
+    {
+        fprintf(stderr, "Malloc failed in feistel_padding().\n");
+        exit(EXIT_FAILURE);
+    }
     block_size = strlen((char *)block);
     memset(padded_block, 0, padding_block_size);
     memcpy(padded_block, block, sizeof(uint8_t) * block_size);
@@ -684,12 +753,19 @@ uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t keys[][BLOCK_SIZE / 2])
         total_blocks++;
 
     length = total_blocks * BLOCK_SIZE;
+    /* Padding so that plaintext has length == n*64 bits (n*8 bytes)*/
     padded_plaintext = feistel_padding(plaintext, length);
     ciphertext = (uint8_t *)malloc(sizeof(uint8_t) * (length + 1));
     left_block = (uint8_t *)malloc(sizeof(uint8_t) * ((BLOCK_SIZE / 2) + 1));
     right_block = (uint8_t *)malloc(sizeof(uint8_t) * ((BLOCK_SIZE / 2) + 1));
+    if (!ciphertext || !left_block || !right_block)
+    {
+        fprintf(stderr, "Malloc failed in feistel_encrypt().\n");
+        exit(EXIT_FAILURE);
+    }
 
     rounds_counter = 0;
+    /* Feistel keys generation */
     while (rounds_counter < NUM_OF_ROUNDS)
     {
         key = key_generator(BLOCK_SIZE / 2);
@@ -701,6 +777,7 @@ uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t keys[][BLOCK_SIZE / 2])
 
     blocks_counter = 0;
     rounds_counter = 0;
+    /* Divide plaintext into blocks of 8 bytes */
     while (blocks_counter < total_blocks)
     {
         memcpy(left_block, (padded_plaintext + (blocks_counter * BLOCK_SIZE)), sizeof(uint8_t) * (BLOCK_SIZE / 2));
@@ -715,6 +792,7 @@ uint8_t *feistel_encrypt(uint8_t *plaintext, uint8_t keys[][BLOCK_SIZE / 2])
             round_block = NULL;
         }
         rounds_counter = 0;
+        /* Put first the right block and then the left block instead of another swap */
         memcpy((ciphertext + (blocks_counter * BLOCK_SIZE)), right_block, sizeof(uint8_t) * (BLOCK_SIZE / 2));
         memcpy((ciphertext + (blocks_counter * BLOCK_SIZE) + BLOCK_SIZE / 2), left_block, sizeof(uint8_t) * (BLOCK_SIZE / 2));
         blocks_counter++;
@@ -741,14 +819,21 @@ uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t keys[][BLOCK_SIZE / 2], si
     plaintext = (uint8_t *)malloc(sizeof(uint8_t) * (length + 1));
     left_block = (uint8_t *)malloc(sizeof(uint8_t) * ((BLOCK_SIZE / 2) + 1));
     right_block = (uint8_t *)malloc(sizeof(uint8_t) * ((BLOCK_SIZE / 2) + 1));
+    if (!plaintext || !left_block || !right_block)
+    {
+        fprintf(stderr, "Malloc failed in feistel_decrypt().\n");
+        exit(EXIT_FAILURE);
+    }
 
     blocks_counter = 0;
     rounds_counter = NUM_OF_ROUNDS - 1;
+    /* Divide plaintext into blocks of 8 bytes */
     while (blocks_counter < total_blocks)
     {
         memcpy(left_block, (ciphertext + (blocks_counter * BLOCK_SIZE)), sizeof(uint8_t) * (BLOCK_SIZE / 2));
         memcpy(right_block, (ciphertext + (blocks_counter * BLOCK_SIZE) + BLOCK_SIZE / 2), sizeof(uint8_t) * (BLOCK_SIZE / 2));
 
+        /* Reverse order of the keys */
         while (rounds_counter >= 0)
         {
             round_block = feistel_round(right_block, keys[rounds_counter]);
@@ -759,6 +844,7 @@ uint8_t *feistel_decrypt(uint8_t *ciphertext, uint8_t keys[][BLOCK_SIZE / 2], si
             round_block = NULL;
         }
         rounds_counter = NUM_OF_ROUNDS - 1;
+        /* Put first the right block and then the left block instead of another swap */
         memcpy((plaintext + (blocks_counter * BLOCK_SIZE)), right_block, sizeof(uint8_t) * (BLOCK_SIZE / 2));
         memcpy((plaintext + (blocks_counter * BLOCK_SIZE) + BLOCK_SIZE / 2), left_block, sizeof(uint8_t) * (BLOCK_SIZE / 2));
         blocks_counter++;

@@ -95,8 +95,8 @@ int main(int argc, char *argv[])
     {
         printf("You chose one time pad algorithm for your encryption.\n");
         key = key_generator(plaintext_size);
-        fprintf(output, "Key: %s\n", key);
-        fprintf(output, "Key len: %lu\n\n", strlen((char *)key));
+        /*fprintf(output, "Key: %s\n", key);
+        fprintf(output, "Key len: %lu\n\n", strlen((char *)key));*/
         ciphertext = otp_encrypt(plaintext, key);
         fprintf(output, "Ciphertext:\n%s\n", ciphertext);
         fprintf(output, "Ciphertext len: %lu\n\n", strlen((char *)ciphertext));
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     else if (algorithm == PLAYFAIR_CIPHER)
     {
         printf("You chose playfair cipher algorithm for your encryption.\n");
-        key_matrix = playfair_keymatrix((unsigned char *)"HELLO WORLD");
+        key_matrix = playfair_keymatrix(KEY_FOR_KEYMATRIX);
         print_keymatrix(key_matrix);
 
         ciphertext = playfair_encrypt(plaintext, key_matrix);

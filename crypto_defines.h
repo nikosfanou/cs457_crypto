@@ -25,6 +25,7 @@
 #define KEYMATRIX_SIZE 25
 #define KEYMATRIX_ROWS 5
 #define KEYMATRIX_COLUMNS 5
+#define KEY_FOR_KEYMATRIX (unsigned char *)"HELLO WORLD"
 
 /*  The distance of the first uppercase and
     the first lowercase letter in ASCII table. */
