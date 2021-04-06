@@ -623,11 +623,6 @@ uint8_t *affine_encrypt(uint8_t *plaintext)
                 *(ciphertext + ciphertext_size) = *(plaintext + counter) - UPPER_LOWER_DISTANCE;
                 ciphertext_size++;
             }
-            else if (*(plaintext + counter) == ' ' || *(plaintext + counter) == '\n')
-            {
-                *(ciphertext + ciphertext_size) = *(plaintext + counter);
-                ciphertext_size++;
-            }
             continue;
         }
 
@@ -638,8 +633,7 @@ uint8_t *affine_encrypt(uint8_t *plaintext)
     for (counter = 0; counter < ciphertext_size; counter++)
     {
         /* f(x) = (A * X + B) mod M */
-        if ((*(ciphertext + counter) != ' ') && (*(ciphertext + counter) != '\n'))
-            *(ciphertext + counter) = ((A * (*(ciphertext + counter) - UPPERCASE_START) + B) % M) + UPPERCASE_START;
+        *(ciphertext + counter) = ((A * (*(ciphertext + counter) - UPPERCASE_START) + B) % M) + UPPERCASE_START;
     }
 
     *(ciphertext + ciphertext_size) = '\0';
@@ -662,10 +656,7 @@ uint8_t *affine_decrypt(uint8_t *ciphertext)
         A^-1 is the modular multiplicative inverse of A mod M*/
     for (counter = 0; counter < length; counter++)
     {
-        if ((*(ciphertext + counter) != ' ') && (*(ciphertext + counter) != '\n'))
-            *(plaintext + counter) = ((modInverse(A, M) * ((*(ciphertext + counter) + UPPERCASE_START) - B)) % M) + UPPERCASE_START;
-        else
-            *(plaintext + counter) = *(ciphertext + counter);
+        *(plaintext + counter) = ((modInverse(A, M) * ((*(ciphertext + counter) + UPPERCASE_START) - B)) % M) + UPPERCASE_START;
     }
 
     *(plaintext + length) = '\0';
