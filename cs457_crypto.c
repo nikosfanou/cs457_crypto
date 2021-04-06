@@ -17,13 +17,13 @@
  *          pair of characters in playfair cipher.
  * 
  */
-queue_t *Xqueue = NULL;
+/*queue_t *Xqueue = NULL;*/
 
 /**
  * @brief   Global variable to store where J exists in the plaintext.
  * 
  */
-queue_t *Jqueue = NULL;
+/*queue_t *Jqueue = NULL;*/
 
 /**
  * @brief   Stores if the plaintext size is odd number.
@@ -33,7 +33,7 @@ queue_t *Jqueue = NULL;
  *          If 1, its not.
  * 
  */
-int message_odd = 0;
+/*int message_odd = 0;*/
 
 uint8_t *read_plaintext(FILE *input_message)
 {
@@ -437,8 +437,8 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
     assert(key);
     length = strlen((char *)plaintext);
     ciphertext_size = 0;
-    Xqueue = queue_init();
-    Jqueue = queue_init();
+    /*Xqueue = queue_init();
+    Jqueue = queue_init();*/
 
     ciphertext = malloc(sizeof(unsigned char) * (length + isOdd(length) + 1));
     if (!ciphertext)
@@ -461,8 +461,8 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
     {
         /*  Keep in a queue the positions of X that exist as a second char
             on a pair of chars (but not the last pair). */
-        if ((counter != ciphertext_size - 1) && (*(ciphertext + counter + 1) == 'X'))
-            enqueue(Xqueue, counter + 1);
+        /*if ((counter != ciphertext_size - 1) && (*(ciphertext + counter + 1) == 'X'))
+            enqueue(Xqueue, counter + 1);*/
 
         /*  Counter is always even. So if we get in the next if statement because of the first expression
             it means that ciphertext_size is odd and we reached the last pair (which is one char in reality).
@@ -471,7 +471,7 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
             *(ciphertext + counter + 1) = 'X';
     }
 
-    message_odd = isOdd(ciphertext_size);
+    /*message_odd = isOdd(ciphertext_size);*/
     ciphertext_size = ciphertext_size + isOdd(ciphertext_size);
 
     for (counter = 0; counter < ciphertext_size; counter = counter + 2)
@@ -480,12 +480,12 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
         if (*(ciphertext + counter) == 'J')
         {
             *(ciphertext + counter) = 'I';
-            enqueue(Jqueue, counter);
+            /*enqueue(Jqueue, counter);*/
         }
         if (*(ciphertext + counter + 1) == 'J')
         {
             *(ciphertext + counter + 1) = 'I';
-            enqueue(Jqueue, counter + 1);
+            /*enqueue(Jqueue, counter + 1);*/
         }
 
         getPositionOnKeymatrix(key, *(ciphertext + counter), &rowOfFirst, &columnOfFirst);
@@ -559,10 +559,10 @@ unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
         }
     }
 
-    for (counter = 0; counter < length; counter = counter + 2)
-    {
+    /*for (counter = 0; counter < length; counter = counter + 2)
+    {*/
         /* J replacements */
-        if (!queue_is_empty(Jqueue) && queue_peek(Jqueue) == counter)
+        /*if (!queue_is_empty(Jqueue) && queue_peek(Jqueue) == counter)
         {
             dequeue(Jqueue);
             *(plaintext + counter) = 'J';
@@ -573,18 +573,18 @@ unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
             dequeue(Jqueue);
             *(plaintext + counter + 1) = 'J';
             continue;
-        }
+        }*/
 
         /* If the second character of the pair was X in plaintext then dequeue and continue */
-        if (!queue_is_empty(Xqueue) && queue_peek(Xqueue) == counter + 1)
+        /*if (!queue_is_empty(Xqueue) && queue_peek(Xqueue) == counter + 1)
         {
             dequeue(Xqueue);
             continue;
-        }
+        }*/
 
         /*  If the second character of the pair is X and we reach here, it means that we placed it
             because of a duplicate character or because of ciphertext fulfillment (plaintext size was odd).*/
-        if (*(plaintext + counter + 1) == 'X')
+        /*if (*(plaintext + counter + 1) == 'X')
         {
             if ((counter == length - 2) && message_odd)
                 *(plaintext + counter + 1) = '\0';
@@ -595,7 +595,7 @@ unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
     queue_free(Xqueue);
     queue_free(Jqueue);
     Xqueue = NULL;
-    Jqueue = NULL;
+    Jqueue = NULL;*/
     *(plaintext + length) = '\0';
     return plaintext;
 }
