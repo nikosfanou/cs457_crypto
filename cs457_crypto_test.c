@@ -73,23 +73,26 @@ int main(int argc, char *argv[])
                 "   -1                  If set, the program uses one time pad algorithm for the cryptography.\n"
                 "   -c                  If set, the program uses caesar's cipher algorithm for the cryptography.\n"
                 "   -p                  If set, the program uses playfair cipher algorithm for the cryptography.\n"
+                );
+            printf(
                 "   -a                  If set, the program uses affine cipher algorithm for the cryptography.\n"
                 "   -f                  If set, the program uses feistel cipher algorithm for the cryptography.\n"
                 "   -h                  Prints this help\n"
                 "By default:\n"
                 "   Input file stream is stdin.\n"
                 "   Output file stream is stdout.\n"
-                "   Cryptography algorithm is one time pad.\n");
+                "   Cryptography algorithm is one time pad.\n"
+            );
             return 0;
         default:
-            printf("Wrong command line arguments. Type -i for input file and -o for output file.\n");
+            printf("Wrong command line arguments. Type -h to print the help.\n");
             return -1;
         }
     }
 
     plaintext = read_plaintext(input);
     plaintext_size = strlen((char *)plaintext);
-    fprintf(output, "Plaintext:\n%s\n", plaintext);
+    fprintf(output, "\nPlaintext:\n%s\n", plaintext);
     fprintf(output, "Plaintext len: %lu\n\n", plaintext_size);
     if (algorithm == ONE_TIME_PAD)
     {
