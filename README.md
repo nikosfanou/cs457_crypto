@@ -11,6 +11,7 @@ The cryptographic library will provide five cryptographic algorithms:
 make all
 
 ##HOW TO RUN:
+
 ./crypto (-i "inputfile") (-o "outputfile") (-c for ceasar cipher) (-1 for one time pad cipher)
 (-p for playfair cipher) (-a for affine cipher) (-f for feistel cipher)
 
@@ -25,9 +26,13 @@ Cipher = one time pad
 You can use:
 
 make otp --> To run crypto with one time pad cipher and the default stream files.
+
 make caesar --> To run crypto with caesar cipher and the default stream files.
+
 make playfair --> To run crypto with playfair cipher and the default stream files.
+
 make affine --> To run crypto with affine cipher and the default stream files.
+
 make feistel --> To run crypto with feistel cipher and the default stream files.
 
 ##BRIEF DESCRIPTION OF HOW THE ALGORITHMS WORK:
@@ -126,5 +131,5 @@ Feistel cipher:
         Decryption works in the opposite way.
 
     Alphabet set:
-    
+
         All characters.
