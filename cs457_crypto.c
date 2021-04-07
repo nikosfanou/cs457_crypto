@@ -456,7 +456,8 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
             ciphertext_size++;
         }
     }
-
+    /* For safe check of the second character of a pair. */
+    *(ciphertext + ciphertext_size) = '\0';
     for (counter = 0; counter < ciphertext_size; counter = counter + 2)
     {
         /*  Keep in a queue the positions of X that exist as a second char
@@ -464,6 +465,17 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
         /*if ((counter != ciphertext_size - 1) && (*(ciphertext + counter + 1) == 'X'))
             enqueue(Xqueue, counter + 1);*/
 
+        /* If found J put I but store the position of J on a queue*/
+        if (*(ciphertext + counter) == 'J')
+        {
+            *(ciphertext + counter) = 'I';
+            /*enqueue(Jqueue, counter);*/
+        }
+        if (*(ciphertext + counter + 1) == 'J')
+        {
+            *(ciphertext + counter + 1) = 'I';
+            /*enqueue(Jqueue, counter + 1);*/
+        }
         /*  Counter is always even. So if we get in the next if statement because of the first expression
             it means that ciphertext_size is odd and we reached the last pair (which is one char in reality).
             So we must make another one pair and we fill it with X.*/
@@ -476,17 +488,6 @@ unsigned char *playfair_encrypt(unsigned char *plaintext, unsigned char **key)
 
     for (counter = 0; counter < ciphertext_size; counter = counter + 2)
     {
-        /* If found J put I but store the position of J on a queue*/
-        if (*(ciphertext + counter) == 'J')
-        {
-            *(ciphertext + counter) = 'I';
-            /*enqueue(Jqueue, counter);*/
-        }
-        if (*(ciphertext + counter + 1) == 'J')
-        {
-            *(ciphertext + counter + 1) = 'I';
-            /*enqueue(Jqueue, counter + 1);*/
-        }
 
         getPositionOnKeymatrix(key, *(ciphertext + counter), &rowOfFirst, &columnOfFirst);
         getPositionOnKeymatrix(key, *(ciphertext + counter + 1), &rowOfSecond, &columnOfSecond);
@@ -561,6 +562,21 @@ unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
 
     /*for (counter = 0; counter < length; counter = counter + 2)
     {*/
+
+        /* If the second character of the pair was X in plaintext then dequeue and continue */
+        /*if (!queue_is_empty(Xqueue) && queue_peek(Xqueue) == counter + 1)
+        {
+            dequeue(Xqueue);
+        }*/
+        /*  If the second character of the pair is X and we reach here, it means that we placed it
+            because of a duplicate character or because of ciphertext fulfillment (plaintext size was odd).*/
+        /*else if (*(plaintext + counter + 1) == 'X')
+        {
+            if ((counter == length - 2) && message_odd)
+                *(plaintext + counter + 1) = '\0';
+            else
+                *(plaintext + counter + 1) = *(plaintext + counter);
+        }*/
         /* J replacements */
         /*if (!queue_is_empty(Jqueue) && queue_peek(Jqueue) == counter)
         {
@@ -573,23 +589,6 @@ unsigned char *playfair_decrypt(unsigned char *ciphertext, unsigned char **key)
             dequeue(Jqueue);
             *(plaintext + counter + 1) = 'J';
             continue;
-        }*/
-
-        /* If the second character of the pair was X in plaintext then dequeue and continue */
-        /*if (!queue_is_empty(Xqueue) && queue_peek(Xqueue) == counter + 1)
-        {
-            dequeue(Xqueue);
-            continue;
-        }*/
-
-        /*  If the second character of the pair is X and we reach here, it means that we placed it
-            because of a duplicate character or because of ciphertext fulfillment (plaintext size was odd).*/
-        /*if (*(plaintext + counter + 1) == 'X')
-        {
-            if ((counter == length - 2) && message_odd)
-                *(plaintext + counter + 1) = '\0';
-            else
-                *(plaintext + counter + 1) = *(plaintext + counter);
         }
     }
     queue_free(Xqueue);
