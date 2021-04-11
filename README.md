@@ -66,7 +66,6 @@ Caesar's cipher:
     Alphabet set:
 
         Alphabet set is digits, lower and uppercase letters.
-        Other characters are not encrypted/decrypted.
 
 Playfair cipher:
 

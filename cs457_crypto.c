@@ -185,7 +185,7 @@ uint8_t *otp_decrypt(uint8_t *ciphertext, uint8_t *key)
 uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N)
 {
     size_t len;
-    size_t count;
+    size_t count, count2;
     uint8_t *ciphertext;
     uint8_t character;
 
@@ -199,60 +199,64 @@ uint8_t *caesar_encrypt(uint8_t *plaintext, uint16_t N)
     }
 
     count = 0;
+    count2 = 0;
     while (count < len)
     {
         character = *(plaintext + count);
-        *(ciphertext + count) = character + (N % CEASAR_ALPHABET_SIZE);
+        *(ciphertext + count2) = character + (N % CEASAR_ALPHABET_SIZE);
         /* If read digit */
         if (isDigit(character))
         {
             /* If with the addition of N it surpasses digit end then add the amount of letters that exist
             between digits and uppercase letters in ascii table */
-            if (*(ciphertext + count) > DIGIT_END)
-                *(ciphertext + count) = *(ciphertext + count) + (UPPERCASE_START - DIGIT_END - 1);
+            if (*(ciphertext + count2) > DIGIT_END)
+                *(ciphertext + count2) = *(ciphertext + count2) + (UPPERCASE_START - DIGIT_END - 1);
 
             /* If with the addition of N and the amount of letters that exist
             between digits and uppercase letters in ascii table
             it surpasses uppercase end then add the amount of letters that exist
             between lowercase and uppercase letters in ascii table */
-            if (*(ciphertext + count) > UPPERCASE_END)
-                *(ciphertext + count) = *(ciphertext + count) + (LOWERCASE_START - UPPERCASE_END - 1);
+            if (*(ciphertext + count2) > UPPERCASE_END)
+                *(ciphertext + count2) = *(ciphertext + count2) + (LOWERCASE_START - UPPERCASE_END - 1);
 
             /* If with the addition of the previous, it surpasses lowercase end then wrap around! */
-            if (*(ciphertext + count) > LOWERCASE_END)
-                *(ciphertext + count) = (*(ciphertext + count) % (LOWERCASE_END + 1)) + DIGIT_START; /* WRAP AROUND */
+            if (*(ciphertext + count2) > LOWERCASE_END)
+                *(ciphertext + count2) = (*(ciphertext + count2) % (LOWERCASE_END + 1)) + DIGIT_START; /* WRAP AROUND */
+
+            count2++;
         }
         else if (isUppercaseLetter(character))
         {
-            if (*(ciphertext + count) > UPPERCASE_END)
-                *(ciphertext + count) = *(ciphertext + count) + (LOWERCASE_START - UPPERCASE_END - 1);
+            if (*(ciphertext + count2) > UPPERCASE_END)
+                *(ciphertext + count2) = *(ciphertext + count2) + (LOWERCASE_START - UPPERCASE_END - 1);
 
-            if (*(ciphertext + count) > LOWERCASE_END)
+            if (*(ciphertext + count2) > LOWERCASE_END)
             {
-                *(ciphertext + count) = (*(ciphertext + count) % (LOWERCASE_END + 1)) + DIGIT_START;
-                if (*(ciphertext + count) > DIGIT_END)
-                    *(ciphertext + count) = *(ciphertext + count) + (UPPERCASE_START - DIGIT_END - 1);
+                *(ciphertext + count2) = (*(ciphertext + count2) % (LOWERCASE_END + 1)) + DIGIT_START;
+                if (*(ciphertext + count2) > DIGIT_END)
+                    *(ciphertext + count2) = *(ciphertext + count2) + (UPPERCASE_START - DIGIT_END - 1);
             }
+
+            count2++;
         }
         else if (isLowercaseLetter(character))
         {
-            if (*(ciphertext + count) > LOWERCASE_END)
+            if (*(ciphertext + count2) > LOWERCASE_END)
             {
-                *(ciphertext + count) = (*(ciphertext + count) % (LOWERCASE_END + 1)) + DIGIT_START;
-                if (*(ciphertext + count) > DIGIT_END)
-                    *(ciphertext + count) = *(ciphertext + count) + (UPPERCASE_START - DIGIT_END - 1);
+                *(ciphertext + count2) = (*(ciphertext + count2) % (LOWERCASE_END + 1)) + DIGIT_START;
+                if (*(ciphertext + count2) > DIGIT_END)
+                    *(ciphertext + count2) = *(ciphertext + count2) + (UPPERCASE_START - DIGIT_END - 1);
 
-                if (*(ciphertext + count) > UPPERCASE_END)
-                    *(ciphertext + count) = *(ciphertext + count) + (LOWERCASE_START - UPPERCASE_END - 1);
+                if (*(ciphertext + count2) > UPPERCASE_END)
+                    *(ciphertext + count2) = *(ciphertext + count2) + (LOWERCASE_START - UPPERCASE_END - 1);
             }
+
+            count2++;
         }
-        else
-        {
-            *(ciphertext + count) = character;
-        }
+
         count++;
     }
-    *(ciphertext + count) = '\0';
+    *(ciphertext + count2) = '\0';
     return ciphertext;
 }
 
