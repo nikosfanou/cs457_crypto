@@ -1,16 +1,20 @@
 # A simple cryptographic library using C
-## Fanourakis Nikos 4237
 
-The cryptographic library will provide five cryptographic algorithms: 
+Author: Fanourakis Nikos
 
-(i) One-time pad, (ii) Caesar’s cipher, (iii) Playfair cipher,
-(iv) Affine cipher and (v) Feistel cipher
+The cryptographic library will provide five cryptographic algorithms:
 
-##HOW TO COMPILE:
+  1. One-time pad
+  2. Caesar’s cipher
+  3. Playfair cipher
+  4. Affine cipher
+  5. Feistel cipher
+
+## HOW TO COMPILE:
 
 make all
 
-##HOW TO RUN:
+## HOW TO RUN:
 
 ./crypto (-i "inputfile") (-o "outputfile") (-c for ceasar cipher) (-1 for one time pad cipher)
 (-p for playfair cipher) (-a for affine cipher) (-f for feistel cipher)
@@ -35,7 +39,7 @@ make affine --> To run crypto with affine cipher and the default stream files.
 
 make feistel --> To run crypto with feistel cipher and the default stream files.
 
-##BRIEF DESCRIPTION OF HOW THE ALGORITHMS WORK:
+## BRIEF DESCRIPTION OF HOW THE ALGORITHMS WORK
 
 One time pad:
 
