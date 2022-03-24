@@ -10,11 +10,11 @@ The cryptographic library will provide five cryptographic algorithms:
   4. Affine cipher
   5. Feistel cipher
 
-## HOW TO COMPILE:
+## HOW TO COMPILE
 
 make all
 
-## HOW TO RUN:
+## HOW TO RUN
 
 ./crypto (-i "inputfile") (-o "outputfile") (-c for ceasar cipher) (-1 for one time pad cipher)
 (-p for playfair cipher) (-a for affine cipher) (-f for feistel cipher)
